@@ -16,8 +16,9 @@ Options:
   -l, --log                             Enable gmusicapi logging.
   -d, --dry-run                         Output options and files
   -q, --quiet                           Don't output status messages.
+  -v, --verbose                         Output status messages.
                                         With -l,--log will display warnings.
-                                        With -d,--dry-run will parameters.
+                                        With -d,--dry-run will show parameters.
   -o FILE, --output FILE                Output filename to write to.
   -f FILE, --files FILE                 File containing files.
   --cover FILE                          Add a file of cover-art
@@ -28,9 +29,12 @@ Patterns can be any valid Python regex patterns.
 
 from __future__ import print_function;
 
+from audiobooks._Track import Track
+
 from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
+from mutagen.easymp4 import EasyMP4
 from cached_property import cached_property
 
 from unidecode import unidecode
@@ -53,8 +57,6 @@ logging.addLevelName(25, "QUIET")
 
 logging.basicConfig(filename='audiobooks.log', level=QUIET)
 logger = logging.getLogger('Test')
-sh = logging.StreamHandler()
-logger.addHandler(sh)
 
 CHAPTER_TEMPLATE = """CHAPTER%(CHAPNUM)s=%(HOURS)02d:%(MINS)02d:%(SECS)02d
 CHAPTER%(CHAPNUM)sNAME=%(CHAPNAME)s
@@ -64,74 +66,14 @@ CHAPS_COMMAND = "mp4chaps"
 
 cli = None
 
-class Track(object):
-    """single audio file"""
-    def __init__(self, fname):
-        self.fname = fname
-        self._track = EasyMP4(self.fname)
-        logger.info("Track: ctr: " + type(self._track).__name__)
-
-    @cached_property
-    def duration(self):
-        """get track duration in seconds"""
-        track_duration = int(floor(self._track.info.length) + 1)
-        return track_duration
-
-    @cached_property
-    def title(self):
-        """get track title as unicode string"""
-        track_title = "Unknown"
-        try:
-            track_title = self._track['title'][0]
-        except:
-            logger.warning("track_title")
-            
-        return track_title
-
-    @cached_property
-    def disc_track(self):
-        """get disc and track number as tuple"""
-        discnumber = 1
-        try:
-            discnumber = int(self._track['discnumber'][0])
-        except:
-            logger.warning("discnumber")
-            
-        tracknumber = 1
-        try:
-            tracknumber = int(self._track['tracknumber'][0])
-        except:
-            logger.warning("tracknumber")
-            
-        return (discnumber, tracknumber)
-
-    @cached_property
-    def album(self):
-        """get album name"""
-        track_album = self._track['album'][0]
-        return track_album
-
-    @cached_property
-    def artist(self):
-        """get artist name"""
-        track_artist = self._track['artist'][0]
-        return track_artist
-
-    def __unicode__(self):
-        """text representation"""
-        return "<Track '%s'>" % self.title
-
-    def __repr__(self):
-        """utf-8 formatted text representation"""
-        return self.__unicode__().encode('utf-8')
-
 def get_tracks(dir_name='.'):
     """get track titles and lengths
 
     track file extensions *must* end with .m4a"""
     track_files = glob.glob(os.path.join(dir_name, '*.m4a'))
     track_list = [Track(track_file) for track_file in track_files]
-    return sorted(track_list, key=attrgetter('disc_track'))
+    track_list = sorted(track_list, key=attrgetter('disc_track'))
+    return track_list
 
 def write_csv(output_fname, tracks):
     """write csv file with track numbers and title
@@ -225,6 +167,9 @@ def cli_run(argv):
 
     if enable_logging:
         logger.setLevel(logging.DEBUG)
+        if cli['verbose']:
+            sh = logging.StreamHandler()
+            logger.addHandler(sh)
 
     for k in cli.items():
         logger.info(k)
@@ -240,6 +185,47 @@ def cli_run(argv):
         logger.info('tracks: ' + str(len(tracks)))
         return
     
+    if cli['output']:
+        output_fname = cli['output']
+    else:
+        output_fname = "%s.m4b" % os.path.join(
+            cli['output'],
+            tracks[0].album.encode('utf-8')
+        )
+
+    if cli['cover']:
+        cover_fname = cli['cover']
+    else:
+        cover_fname = os.path.join(cli['output'], 'cover.jpg')
+
+
+    chapter_fname = mkstemp(prefix='chaplist')[1]
+    try:
+        logger.info("gathering chapter information")
+        write_chaplist(chapter_fname, tracks)
+    except:
+        raise
+
+    try:
+        logger.info("combining audio tracks")
+        combine_files(output_fname, tracks, chapter_fname)
+    except:
+        raise
+    
+    try:
+        logger.info("writing original metadata to new audiobook")
+        write_audio_metadata(output_fname,
+                             album=tracks[0].album,
+                             artist=tracks[0].artist,
+        )
+    except:
+        raise
+
+    try:
+        logger.info("adding cover image if available")
+        write_audio_cover(output_fname, cover_fname)
+    except IOError:
+        logger.info("unable to add cover image.")
     
 
 def main():

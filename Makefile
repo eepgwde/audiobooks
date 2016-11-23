@@ -1,10 +1,11 @@
 ## weaves
 # Test make file for MInfo.py module testing.
 
+PKG := $(notdir $(PWD))
+
 PYTHON ?= python3
 UUT ?= 
-PKG ?= audiobooks
-X_LOGFILE ?= $(PKG).log
+X_LOGFILE ?= test.log
 SDIR ?= tests/media
 PYTHONIOENCODING=utf-8
 
@@ -47,4 +48,13 @@ dist-local:
 	python setup.py sdist
 
 install: uninstall dist-local
-	pip3 install $(wildcard dist/*.tar.gz) --user
+	pip3 install -e . --user
+
+clean::
+	-$(SHELL) -c "find . -type d -name __pycache__ -exec rm -rf {} \;"
+	-$(SHELL) -c "find . -type f -name '*.log' -delete "
+	-$(SHELL) -c "find . -type f -name '*~' -delete "
+	-$(SHELL) -c "find . -type d -name '*egg*' -exec rm -rf {} \; "
+	rm -f $(wildcard dist/*)
+	rm -f ChangeLog AUTHORS
+
