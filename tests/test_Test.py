@@ -1,14 +1,10 @@
 ## @file Test.py
 # @author weaves
-# @brief Unittest of MInfo
+# @brief Unittest
 #
-# This module tests the ancillary operations and the 
-# 
 # @note
 #
 # Relatively complete test.
-
-import minfo 
 
 import sys, logging, os
 from unidecode import unidecode
@@ -17,13 +13,12 @@ from datetime import datetime, timezone, timedelta, date
 
 from collections import Counter
 
-from MediaInfoDLL3 import MediaInfo
-
 import unittest
 
-from audiobooks.app import Track
+from audiobooks._Track import Track
+from audiobooks._Tracks import Tracks
 
-logfile = os.environ['X_LOGFILE'] if os.environ.get('X_LOGFILE') is not None else media
+logfile = os.environ['X_LOGFILE'] if os.environ.get('X_LOGFILE') is not None else "test.log"
 logging.basicConfig(filename=logfile, level=logging.DEBUG)
 logger = logging.getLogger('Test')
 sh = logging.StreamHandler()
@@ -94,25 +89,17 @@ class Test(unittest.TestCase):
 
     def test_01(self):
         self.assertIsNotNone(self.test0)
-        self.logger.info("track: type: " + type(self.test0).__name__)
-        self.logger.info('duration: type: ' + type(self.test0.duration).__name__)
-        self.logger.info('duration: ' + str(self.test0.duration))
-        self.logger.info('duration: ' + str(self.test0.disc_track))
+        self.logger.info('test0: ' + str(self.test0))
+        
+        self.file0, *type(self).files = type(self).files
+        test1 = Track(self.file0)
+        self.logger.info('test1: ' + str(test1))
 
     def test_02(self):
-        self.logger.info(': ' + type(yday))
-
+        self.logger.info('test_02')
     
     def test_03(self):
         self.logger.info('test_03')
-        self.assertIsNotNone(self.test0)
-        self.test0.open(self.file0)
-        str0 = self.test0.quality()
-        self.logger.info('str0:' + self.file0 + "; " + str0)
-
-        format0 = "%H:%M:%S.%f"
-        d = datetime.strptime(str0, format0)
-        self.logger.info('strptime:' + d.strftime(format0))
 
 #
 # The sys.argv line will complain to you if you run it with ipython

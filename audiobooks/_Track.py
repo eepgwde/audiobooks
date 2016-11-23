@@ -1,5 +1,9 @@
+import logging
 from mutagen.easymp4 import EasyMP4
 from cached_property import cached_property
+from unidecode import unidecode
+
+logger = logging.getLogger('Test')
 
 class Track(object):
   """single audio file"""
@@ -56,6 +60,11 @@ class Track(object):
   def __unicode__(self):
     """text representation"""
     return "<Track '%s'>" % self.title
+        
+  def __str__(self):
+    """text representation"""
+    return "<Disc {1:d} Track {2:d} '{0:s}'>".format \
+(unidecode(self.title), self.disc_track[0], self.disc_track[1])
         
   def __repr__(self):
     """utf-8 formatted text representation"""
