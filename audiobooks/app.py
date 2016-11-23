@@ -5,6 +5,8 @@
 
 write track titles and play time for chapter marks to csv file"""
 
+from __future__ import print_function;
+
 from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
@@ -185,17 +187,17 @@ def cli_run(argv):
         cover_fname = os.path.join(cli_args.dir_name, 'cover.jpg')
     chapter_fname = mkstemp(prefix='chaplist')[1]
     try:
-        print "Gathering chapter information"
+        print("Gathering chapter information")
         write_chaplist(chapter_fname, tracks)
     except:
         raise
     try:
-        print "Combining audio tracks"
+        print("Combining audio tracks")
         combine_files(output_fname, tracks, chapter_fname)
     except:
         raise
     try:
-        print "Writing original metadata to new audiobook"
+        print("Writing original metadata to new audiobook")
         write_audio_metadata(output_fname,
                              album=tracks[0].album,
                              artist=tracks[0].artist,
@@ -203,10 +205,10 @@ def cli_run(argv):
     except:
         raise
     try:
-        print "Adding cover image if available"
+        print("Adding cover image if available")
         write_audio_cover(output_fname, cover_fname)
     except IOError:
-        print "Not adding cover image."
+        print("Not adding cover image.")
 
 def main():
     """entrypoint without arguments"""
