@@ -1,9 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""create a tracklist
+"""
+Create an audiobook from files given as input or from a file and output to file.
 
-write track titles and play time for chapter marks to csv file"""
+Usage:
+  audiobooks (-h | --help)
+  audiobooks [-o FILE] [-f FILE]... [options] [<input>]...
+
+Arguments:
+  input                                 Files, directories, or glob patterns to include.
+
+Options:
+  -h, --help                            Display help message.
+  -l, --log                             Enable gmusicapi logging.
+  -d, --dry-run                         Output options and files
+  -q, --quiet                           Don't output status messages.
+                                        With -l,--log will display warnings.
+                                        With -d,--dry-run will parameters.
+  -o FILE, --output FILE                Output filename to write to.
+  -f FILE, --files FILE                 File containing files.
+  --cover FILE                          Add a file of cover-art
+  -c COMMAND, --command COMMAND         What to do: chapters
+
+Patterns can be any valid Python regex patterns.
+"""
 
 from __future__ import print_function;
 
@@ -12,16 +33,28 @@ from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
 from cached_property import cached_property
 
+from unidecode import unidecode
+from docopt import docopt
+
 import csv
 import os
 import sys
 import glob
-import argparse
 import subprocess
 
 from math import floor
 from operator import attrgetter
 from tempfile import mkstemp
+
+import logging
+
+QUIET = 25
+logging.addLevelName(25, "QUIET")
+
+logging.basicConfig(filename='audiobooks.log', level=QUIET)
+logger = logging.getLogger('Test')
+sh = logging.StreamHandler()
+logger.addHandler(sh)
 
 CHAPTER_TEMPLATE = """CHAPTER%(CHAPNUM)s=%(HOURS)02d:%(MINS)02d:%(SECS)02d
 CHAPTER%(CHAPNUM)sNAME=%(CHAPNAME)s
@@ -29,11 +62,14 @@ CHAPTER%(CHAPNUM)sNAME=%(CHAPNAME)s
 MERGE_COMMAND = "MP4Box"
 CHAPS_COMMAND = "mp4chaps"
 
+cli = None
+
 class Track(object):
     """single audio file"""
     def __init__(self, fname):
         self.fname = fname
         self._track = EasyMP4(self.fname)
+        logger.info("Track: ctr: " + type(self._track).__name__)
 
     @cached_property
     def duration(self):
@@ -43,15 +79,30 @@ class Track(object):
 
     @cached_property
     def title(self):
-        """get track title as uncide string"""
-        track_title = self._track['title'][0]
+        """get track title as unicode string"""
+        track_title = "Unknown"
+        try:
+            track_title = self._track['title'][0]
+        except:
+            logger.warning("track_title")
+            
         return track_title
 
     @cached_property
     def disc_track(self):
         """get disc and track number as tuple"""
-        discnumber = int(self._track['discnumber'][0])
-        tracknumber = int(self._track['tracknumber'][0])
+        discnumber = 1
+        try:
+            discnumber = int(self._track['discnumber'][0])
+        except:
+            logger.warning("discnumber")
+            
+        tracknumber = 1
+        try:
+            tracknumber = int(self._track['tracknumber'][0])
+        except:
+            logger.warning("tracknumber")
+            
         return (discnumber, tracknumber)
 
     @cached_property
@@ -163,52 +214,33 @@ def write_audio_cover(output_fname, cover_fname):
     track.save()
 
 def cli_run(argv):
-    """cli script"""
-    arg_parser = argparse.ArgumentParser(
-        prog=argv[0],
-    )
-    arg_parser.add_argument('dir_name', help='Directory to index')
-    arg_parser.add_argument('-o', '--output',
-                            help='Output filename', type=str)
-    arg_parser.add_argument('-c', '--cover',
-                            help='Cover filename', type=str)
-    cli_args = arg_parser.parse_args(args=argv[1:])
-    tracks = get_tracks(os.path.abspath(cli_args.dir_name))
-    if cli_args.output:
-        output_fname = cli_args.output
+    global cli
+    cli = dict((key.lstrip("-<").rstrip(">"), value) for key, value in docopt(__doc__).items())
+
+    enable_logging = cli['log']
+    if cli['quiet']:
+        logger.setLevel(QUIET)
     else:
-        output_fname = "%s.m4b" % os.path.join(
-            cli_args.dir_name,
-            tracks[0].album.encode('utf-8')
-        )
-    if cli_args.cover:
-        cover_fname = cli_args.output
+        logger.setLevel(logging.INFO)
+
+    if enable_logging:
+        logger.setLevel(logging.DEBUG)
+
+    for k in cli.items():
+        logger.info(k)
+
+    if len(cli['input']) > 0:
+        tracks = get_tracks(os.path.abspath(cli['input'][0]))
+    elif len(cli['files']) > 0:
+        tracks = get_tracks(os.path.abspath(cli['files'][0]))
     else:
-        cover_fname = os.path.join(cli_args.dir_name, 'cover.jpg')
-    chapter_fname = mkstemp(prefix='chaplist')[1]
-    try:
-        print("Gathering chapter information")
-        write_chaplist(chapter_fname, tracks)
-    except:
-        raise
-    try:
-        print("Combining audio tracks")
-        combine_files(output_fname, tracks, chapter_fname)
-    except:
-        raise
-    try:
-        print("Writing original metadata to new audiobook")
-        write_audio_metadata(output_fname,
-                             album=tracks[0].album,
-                             artist=tracks[0].artist,
-        )
-    except:
-        raise
-    try:
-        print("Adding cover image if available")
-        write_audio_cover(output_fname, cover_fname)
-    except IOError:
-        print("Not adding cover image.")
+        return
+
+    if cli['dry-run']:
+        logger.info('tracks: ' + str(len(tracks)))
+        return
+    
+    
 
 def main():
     """entrypoint without arguments"""

@@ -21,7 +21,10 @@ from MediaInfoDLL3 import MediaInfo
 
 import unittest
 
-logging.basicConfig(filename='minfo.log', level=logging.DEBUG)
+from audiobooks.app import Track
+
+logfile = os.environ['X_LOGFILE'] if os.environ.get('X_LOGFILE') is not None else media
+logging.basicConfig(filename=logfile, level=logging.DEBUG)
 logger = logging.getLogger('Test')
 sh = logging.StreamHandler()
 logger.addHandler(sh)
@@ -66,7 +69,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.logger.info('setup')
         self.file0, *type(self).files = type(self).files
-        self.test0 = minfo.MInfo(l0 = self.file0)
+        self.test0 = Track(self.file0)
         return
 
     ## Null setup.
@@ -78,7 +81,6 @@ class Test(unittest.TestCase):
     ## Is utf-8 available as a filesystemencoding()
     def test_000(self):
         self.assertIsNotNone(self.test0)
-        self.test0.open(self.file0)
         return
 
     def test_003(self):
@@ -92,23 +94,13 @@ class Test(unittest.TestCase):
 
     def test_01(self):
         self.assertIsNotNone(self.test0)
-        self.test0.open(self.file0)
-        str0 = self.test0.info()
-        self.logger.info(str0)
-        return
+        self.logger.info("track: type: " + type(self.test0).__name__)
+        self.logger.info('duration: type: ' + type(self.test0.duration).__name__)
+        self.logger.info('duration: ' + str(self.test0.duration))
+        self.logger.info('duration: ' + str(self.test0.disc_track))
 
     def test_02(self):
-        format = "%a %b %d %H:%M:%S %Y"
-
-        today = datetime.today()
-        self.logger.info('ISO     :' + str(today))
-
-        s = today.strftime(format)
-        self.logger.info('strftime:' + s)
-
-        d = today
-        yday = d.toordinal() - date(d.year, 1, 1).toordinal() + 1
-        self.logger.info('yday: ' + str(yday))
+        self.logger.info(': ' + type(yday))
 
     
     def test_03(self):
