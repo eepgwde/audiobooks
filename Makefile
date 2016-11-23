@@ -41,7 +41,7 @@ distclean::
 
 uninstall::
 	rm -f $(wildcard dist/*.tar.gz)
-	-$(shell -c "cd $(HOME)/.local; -pip3 uninstall --yes $(PKG)")
+	-$(SHELL) -c "cd $(HOME)/.local; pip3 uninstall --yes $(PKG)"
 
 dist-local:
 	python setup.py sdist
