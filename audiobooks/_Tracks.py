@@ -1,7 +1,16 @@
+# -*- coding: utf-8 -*-
+## @author weaves
+##
+## Wrapper class for MP4 tracks.
+
+import glob
+import os
+
 from mutagen.easymp4 import EasyMP4
 from cached_property import cached_property
 
 from collections import UserList
+from operator import attrgetter
 
 from weaves import singledispatch1
 
@@ -16,13 +25,6 @@ class Tracks(UserList):
     super().__init__(self.load(fnames))
     self.fnames = fnames
 
-  def __iter__(self):
-    return self
-
-  def __next__(self):
-    tr = self.tracks.next()
-    return tr
-
   @singledispatch1
   def load(self, a):
     raise NotImplementedError('Unsupported type')
@@ -31,7 +33,7 @@ class Tracks(UserList):
   def _(self, fnames, sort0 = False):
     l0 = [Track(track_file) for track_file in fnames]
     if sort0:
-      l0 = sorted(l0.items(), key=lambda t: attrgetter('disc_track'))
+      l0.sort()
     return l0
   
   @load.register(str)

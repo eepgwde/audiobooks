@@ -102,7 +102,20 @@ class Test(unittest.TestCase):
         self.logger.info('trs: ' + str(trs))
     
     def test_03(self):
-        self.logger.info('test_03')
+        trs = Tracks(type(self).files)
+        for tr in trs:
+            self.logger.info('tr: ' + str(tr))
+
+    def test_12(self):
+        self.logger.info('test_02')
+        self.assertIsNotNone(self.test0)
+        trs = Tracks(type(self).dir0)
+        self.logger.info('trs: ' + str(trs))
+    
+    def test_15(self):
+        trs = Tracks(type(self).dir0)
+        for tr in trs:
+            self.logger.info('tr: ' + str(tr))
 
 #
 # The sys.argv line will complain to you if you run it with ipython

@@ -57,6 +57,9 @@ class Track(object):
     track_artist = self._track['artist'][0]
     return track_artist
         
+  def __lt__(self, other):
+    return self.disc_track < other.disc_track
+
   def __unicode__(self):
     """text representation"""
     return "<Track '%s'>" % self.title

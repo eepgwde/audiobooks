@@ -35,7 +35,6 @@ from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
 from mutagen.easymp4 import EasyMP4
-from cached_property import cached_property
 
 from unidecode import unidecode
 from docopt import docopt
