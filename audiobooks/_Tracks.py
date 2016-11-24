@@ -57,7 +57,7 @@ class Tracks(UserList):
   def __getitem__(self, i): 
     tr = super().__getitem__(i)
     logger.debug("Tracks: next")
-    self.duration1(tr)
+    tr.cumulative = self.duration1(tr)
     return tr
 
   def duration1(self, tr):
@@ -79,3 +79,4 @@ class Tracks(UserList):
   def __repr__(self):
     """utf-8 formatted text representation"""
     return "; ".join( [str(x) for x in self.data] )
+

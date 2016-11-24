@@ -17,6 +17,9 @@ logger = logging.getLogger('Test')
 
 class Track(object):
   """single audio file"""
+
+  _cumulative = Singleton.instance().zulu # a Time object
+  
   def __init__(self, fname):
     self.fname = fname
     self._track = EasyMP4(self.fname)
@@ -73,6 +76,17 @@ class Track(object):
     """get artist name"""
     track_artist = self._track['artist'][0]
     return track_artist
+
+  @property
+  def cumulative(self):
+    """
+    Set by a collection object.
+    """
+    return self._cumulative
+
+  @cumulative.setter
+  def cumulative(self, val):
+    self._cumulative = val
         
   def __lt__(self, other):
     return self.disc_track < other.disc_track

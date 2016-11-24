@@ -15,8 +15,7 @@ from collections import Counter
 
 import unittest
 
-from audiobooks._Track import Track
-from audiobooks._Tracks import Tracks
+from audiobooks import Track, Tracks, Book
 
 logfile = os.environ['X_LOGFILE'] if os.environ.get('X_LOGFILE') is not None else "test.log"
 logging.basicConfig(filename=logfile, level=logging.DEBUG)
@@ -158,7 +157,16 @@ class Test(unittest.TestCase):
         for tr in trs:
             self.logger.info('tr: duration: ' + str(tr.duration))
             self.logger.info('tr: duration1: ' + str(tr.duration1))
-            self.logger.info('trs: cumulative: ' + str(trs.get()))
+            self.logger.info('tr: cumulative: ' + str(tr.cumulative))
+
+    def test_30(self):
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+
+        book = Book(files, sort0=True)
+        self.logger.info("book: " + str(book))
+        
 
 #
 # The sys.argv line will complain to you if you run it with ipython
@@ -172,15 +180,4 @@ if __name__ == '__main__':
         # If not remove the command-line arguments.
         sys.argv = [sys.argv[0]]
         unittest.main(module='Test', verbosity=3, failfast=True, exit=False)
-
-
-
-
-
-
-
-
-
-
-
 
