@@ -97,6 +97,9 @@ class Test(unittest.TestCase):
 
     def test_02(self):
         self.logger.info('test_02')
+        self.assertIsNotNone(self.test0)
+        trs = Tracks(type(self).files)
+        self.logger.info('trs: ' + str(trs))
     
     def test_03(self):
         self.logger.info('test_03')

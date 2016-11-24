@@ -1,19 +1,27 @@
 from mutagen.easymp4 import EasyMP4
 from cached_property import cached_property
 
-from collections import OrderedDict
+from collections import UserList
 
 from weaves import singledispatch1
 
-class Tracks(object):
+from audiobooks._Track import Track
+
+class Tracks(UserList):
 
   fnames = []
-  tracks = []
 
   """List of audio"""
   def __init__(self, fnames):
+    super().__init__(self.load(fnames))
     self.fnames = fnames
-    self.tracks = self.load(fnames)
+
+  def __iter__(self):
+    return self
+
+  def __next__(self):
+    tr = self.tracks.next()
+    return tr
 
   @singledispatch1
   def load(self, a):
@@ -23,9 +31,7 @@ class Tracks(object):
   def _(self, fnames, sort0 = False):
     l0 = [Track(track_file) for track_file in fnames]
     if sort0:
-      l0 = OrderedDict(l0.items(), key=lambda t: attrgetter('disc_track'))
-    else:
-      l0 = OrderedDict(l0.items())
+      l0 = sorted(l0.items(), key=lambda t: attrgetter('disc_track'))
     return l0
   
   @load.register(str)
@@ -35,4 +41,4 @@ class Tracks(object):
     
   def __repr__(self):
     """utf-8 formatted text representation"""
-    return "; ".join( [str(x) for x in tracks] )
+    return "; ".join( [str(x) for x in self.data] )
