@@ -1,7 +1,17 @@
+## @file _Track.py
+# @author weaves
+# @brief An MP4 track.
+#
+# Holds a track.
+
 import logging
 from mutagen.easymp4 import EasyMP4
 from cached_property import cached_property
 from unidecode import unidecode
+
+from math import floor
+import datetime
+from weaves import Singleton
 
 logger = logging.getLogger('Test')
 
@@ -17,6 +27,13 @@ class Track(object):
     """get track duration in seconds"""
     track_duration = int(floor(self._track.info.length) + 1)
     return track_duration
+
+  @cached_property
+  def duration1(self):
+    """get track duration as a time"""
+    t0 = self._track.info.length
+    dt = Singleton.instance().dtadvance2(seconds=t0)
+    return dt.time()
 
   @cached_property
   def title(self):

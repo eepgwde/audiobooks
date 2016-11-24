@@ -25,6 +25,7 @@ sh = logging.StreamHandler()
 logger.addHandler(sh)
 
 media0 = os.path.join(os.path.dirname(__file__), "media")
+trs0 = os.path.join(os.path.dirname(__file__), "p1.lst")
 
 ## A test driver for GMus0
 #
@@ -94,6 +95,8 @@ class Test(unittest.TestCase):
         self.file0, *type(self).files = type(self).files
         test1 = Track(self.file0)
         self.logger.info('test1: ' + str(test1))
+        self.logger.info('test1: duration: ' + str(test1.duration))
+        self.logger.info('test1: duration1: ' + str(test1.duration1))
 
     def test_02(self):
         self.logger.info('test_02')
@@ -117,6 +120,46 @@ class Test(unittest.TestCase):
         for tr in trs:
             self.logger.info('tr: ' + str(tr))
 
+    def test_17(self):
+        """
+        Load from a file that lists tracks from two discs, but both discs 
+        are unnumbered (and therefore disc 1.)
+        Don't sort these, use the file order.
+        """
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+
+        trs = Tracks(files, sort0=False)
+        for tr in trs:
+            self.logger.info('tr: ' + str(tr))
+
+    def test_19(self):
+        """
+        As the earlier test, but demonstrate that the sorting works.
+        """
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+
+        trs = Tracks(files, sort0=True)
+        for tr in trs:
+            self.logger.info('tr: ' + str(tr))
+
+    def test_21(self):
+        """
+        Time functions
+        """
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+
+        trs = Tracks(files, sort0=True)
+        for tr in trs:
+            self.logger.info('tr: duration: ' + str(tr.duration))
+            self.logger.info('tr: duration1: ' + str(tr.duration1))
+            self.logger.info('trs: cumulative: ' + str(trs.get()))
+
 #
 # The sys.argv line will complain to you if you run it with ipython
 # emacs. The ipython arguments are passed to unittest.main.
@@ -129,3 +172,15 @@ if __name__ == '__main__':
         # If not remove the command-line arguments.
         sys.argv = [sys.argv[0]]
         unittest.main(module='Test', verbosity=3, failfast=True, exit=False)
+
+
+
+
+
+
+
+
+
+
+
+
