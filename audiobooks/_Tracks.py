@@ -34,7 +34,7 @@ class Tracks(UserList):
   """List of audio"""
   def __init__(self, fnames, **kwargs):
     super().__init__(self.load(fnames, sort0=kwargs.get('sort0', False)))
-    self.set_delegate(kwargs.get('delegate0', "duration1"))
+    self.set_delegate(kwargs.get('delegate0', "before"))
     self.fnames = fnames
 
   @singledispatch1
@@ -66,7 +66,7 @@ class Tracks(UserList):
     tr.quality0 = self._delegate(tr)
     return tr
 
-  def duration1(self, tr):
+  def after(self, tr):
     """
     This accumulates the time collected by duration().
     This is time at the end of the track.
@@ -78,7 +78,7 @@ class Tracks(UserList):
       self._dt = Singleton.instance().dtadvance(self._dt, tm)
     return self.get()
 
-  def duration2(self, tr):
+  def before(self, tr):
     """
     This accumulates the time collected by duration().
     This is time at the end of the track.
@@ -86,7 +86,7 @@ class Tracks(UserList):
     if self._dt is None:
       self._dt = Singleton.instance().epoch
     t0 = self.get()
-    self.duration1(tr)
+    self.after(tr)
     return t0
 
   def get(self, l0 = -1):
