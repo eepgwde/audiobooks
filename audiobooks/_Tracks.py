@@ -8,6 +8,8 @@ import logging
 import glob
 import os
 
+import datetime
+
 from mutagen.easymp4 import EasyMP4
 from cached_property import cached_property
 
@@ -23,12 +25,16 @@ logger = logging.getLogger('Test')
 class Tracks(UserList):
 
   fnames = []
-  _dt = None                    # the cumulative date.
-  _cum0 = []                    # the cumulative times.
+  _dt = None                    # the quality0 date.
+  _delegate = None
 
+  def set_delegate(self, name0):
+    self._delegate = getattr(self, name0)
+    
   """List of audio"""
-  def __init__(self, fnames, sort0=False):
-    super().__init__(self.load(fnames, sort0=sort0))
+  def __init__(self, fnames, **kwargs):
+    super().__init__(self.load(fnames, sort0=kwargs.get('sort0', False)))
+    self.set_delegate(kwargs.get('delegate0', "duration1"))
     self.fnames = fnames
 
   @singledispatch1
@@ -57,7 +63,7 @@ class Tracks(UserList):
   def __getitem__(self, i): 
     tr = super().__getitem__(i)
     logger.debug("Tracks: next")
-    tr.cumulative = self.duration1(tr)
+    tr.quality0 = self._delegate(tr)
     return tr
 
   def duration1(self, tr):
@@ -70,12 +76,21 @@ class Tracks(UserList):
       self._dt = Singleton.instance().tm2dt(tm)
     else:
       self._dt = Singleton.instance().dtadvance(self._dt, tm)
+    return self.get()
 
-    self._cum0.append(Singleton.instance().dt2tm1(self._dt))
-    return self._cum0[-1]
+  def duration2(self, tr):
+    """
+    This accumulates the time collected by duration().
+    This is time at the end of the track.
+    """
+    if self._dt is None:
+      self._dt = Singleton.instance().epoch
+    t0 = self.get()
+    self.duration1(tr)
+    return t0
 
   def get(self, l0 = -1):
-    return self._cum0[l0]
+    return self._dt
 
   def __repr__(self):
     """utf-8 formatted text representation"""

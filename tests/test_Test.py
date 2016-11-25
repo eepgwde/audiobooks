@@ -157,7 +157,7 @@ class Test(unittest.TestCase):
         for tr in trs:
             self.logger.info('tr: duration: ' + str(tr.duration))
             self.logger.info('tr: duration1: ' + str(tr.duration1))
-            self.logger.info('tr: cumulative: ' + str(tr.cumulative))
+            self.logger.info('tr: quality0: ' + str(tr.quality0))
 
     def test_30(self):
         files = []
