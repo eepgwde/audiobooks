@@ -39,11 +39,10 @@ CHAPTER{0:d}NAME={2:s}
     return str(self.tracks)
 
   def chapters(self, file0=None):
-    """write MP4Box compatible chapter marks file
-
-      writes to output_fname, expects track list as input"""
+    """Generate chapter marks and write to filename is given."""
     lines = []
-    c0 = Singleton.instance().zulu
+    c0 = Singleton.instance().zulu # 00:00:00 string.
+    # Lookback times
     for track_number, track in enumerate(self.tracks):
       s0 = self.CHAPTER_TEMPLATE.format \
 (track_number + 1, c0, unidecode(track.title))

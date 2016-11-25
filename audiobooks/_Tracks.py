@@ -62,7 +62,8 @@ class Tracks(UserList):
 
   def duration1(self, tr):
     """
-    This accumulates the time collected by duration()
+    This accumulates the time collected by duration().
+    This is time at the end of the track.
     """
     tm = tr.duration1
     if self._dt is None:
