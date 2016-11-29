@@ -6,16 +6,18 @@ Create an audiobook from files given as input or from a file and output to file.
 
 Usage:
   audiobooks (-h | --help)
-  audiobooks [-o FILE] [-f FILE]... [options] [<input>]...
+  audiobooks [-o FILE] [options] (--files FILE | <input>...)
 
 Arguments:
-  input                                 Files, directories, or glob patterns to include.
+  input                                 A directory of files or a file to update
 
 Options:
   -h, --help                            Display help message.
   -l, --log                             Enable gmusicapi logging.
   -d, --dry-run                         Output options and files
   -q, --quiet                           Don't output status messages.
+  -v, --verbose                         Output status messages.
+  --sort                                Sort tracks by disc and track number 
   -v, --verbose                         Output status messages.
                                         With -l,--log will display warnings.
                                         With -d,--dry-run will show parameters.
@@ -29,7 +31,7 @@ Patterns can be any valid Python regex patterns.
 
 from __future__ import print_function;
 
-from audiobooks._Track import Track
+from audiobooks._Book import Book
 
 from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
@@ -57,22 +59,10 @@ logging.addLevelName(25, "QUIET")
 logging.basicConfig(filename='audiobooks.log', level=QUIET)
 logger = logging.getLogger('Test')
 
-CHAPTER_TEMPLATE = """CHAPTER%(CHAPNUM)s=%(HOURS)02d:%(MINS)02d:%(SECS)02d
-CHAPTER%(CHAPNUM)sNAME=%(CHAPNAME)s
-"""
 MERGE_COMMAND = "MP4Box"
 CHAPS_COMMAND = "mp4chaps"
 
 cli = None
-
-def get_tracks(dir_name='.'):
-    """get track titles and lengths
-
-    track file extensions *must* end with .m4a"""
-    track_files = glob.glob(os.path.join(dir_name, '*.m4a'))
-    track_list = [Track(track_file) for track_file in track_files]
-    track_list = sorted(track_list, key=attrgetter('disc_track'))
-    return track_list
 
 def write_csv(output_fname, tracks):
     """write csv file with track numbers and title
@@ -173,56 +163,75 @@ def cli_run(argv):
     for k in cli.items():
         logger.info(k)
 
-    if len(cli['input']) > 0:
-        tracks = get_tracks(os.path.abspath(cli['input'][0]))
-    elif len(cli['files']) > 0:
-        tracks = get_tracks(os.path.abspath(cli['files'][0]))
-    else:
-        return
+    default0 = lambda x, d: d if x is None else x
+    default1 = lambda x, d: d if isinstance(list, x) and len(x) == 0 else x
 
-    if cli['dry-run']:
-        logger.info('tracks: ' + str(len(tracks)))
-        return
+    output0 = default0(cli['output'], None)
     
-    if cli['output']:
-        output_fname = cli['output']
-    else:
-        output_fname = "%s.m4b" % os.path.join(
-            cli['output'],
-            tracks[0].album.encode('utf-8')
-        )
+    cover1 = "{:s}.jpg".format('cover')
+    cover0 = default0(cli['cover'], cover1)
 
-    if cli['cover']:
-        cover_fname = cli['cover']
-    else:
-        cover_fname = os.path.join(cli['output'], 'cover.jpg')
+    book = None
+    if len(cli['input']) == 1:
+        book = Book(cli['input'][0], sort0 = default0(cli['sort'], True))
+    elif isinstance(cli['input'], list) and len(cli['input']) > 1:
+        book = Book(cli['input'], sort0 = default0(cli['sort'], False))
+    elif cli['files']:
+        logger.debug('files: ')
+        x0 = cli['files']
+        with open(x0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+            book = Book(files, sort0 = default0(cli['sort'], False))
 
+    if book is None:
+        logger.warning("no book")
+        return
 
+    command1 = "chapters"
+    command0 = default0(cli['command'], command1)
+    command0 = command0.split(',')
+    
+    logger.info('book: ' + type(book).__name__)
+    logger.info('book: ' + str(len(book)))
+    logger.info('book: bits: ' + output0 + "; " + cover0)
+    logger.info('book: commands: ' + "; ".join(command0))
+
+    if cli['dry-run']: return
+
+    for cmd in command0:
+        logger.info('cmd: ' + cmd + "; " +type(cmd).__name__ )
+        r0 = book.__getattribute__(cmd)()
+        if r0 is not None: 
+            if isinstance(r0, list):
+                print(*r0, sep='')
+
+    return
+        
     chapter_fname = mkstemp(prefix='chaplist')[1]
     try:
         logger.info("gathering chapter information")
-        write_chaplist(chapter_fname, tracks)
+        write_chaplist(chapter_fname, book)
     except:
         raise
 
     try:
-        logger.info("combining audio tracks")
-        combine_files(output_fname, tracks, chapter_fname)
+        logger.info("combining audio book")
+        combine_files(output0, book, chapter_fname)
     except:
         raise
     
     try:
         logger.info("writing original metadata to new audiobook")
-        write_audio_metadata(output_fname,
-                             album=tracks[0].album,
-                             artist=tracks[0].artist,
+        write_audio_metadata(output0,
+                             album=book[0].album,
+                             artist=book[0].artist,
         )
     except:
         raise
 
     try:
         logger.info("adding cover image if available")
-        write_audio_cover(output_fname, cover_fname)
+        write_audio_cover(output0, cover_fname)
     except IOError:
         logger.info("unable to add cover image.")
     

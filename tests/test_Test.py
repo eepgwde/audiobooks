@@ -166,13 +166,23 @@ class Test(unittest.TestCase):
 
         book = Book(files, sort0=True)
         self.logger.info("book: " + str(book))
+        self.logger.info("book[0]: album: " + str(book[0].album))
         chapters = book.chapters()
+        self.logger.info("chapters: " + str(len(chapters)))
         self.logger.info("book: " + '\n'.join(chapters))
 
     def test_33(self):
         book = Book(type(self).dir0, sort0=True)
-        chapters = book.chapters(file0='t.chaps')
-        self.logger.info("book: \n" + ''.join(chapters))
+        file1 = sys.stdout
+        file1.writelines(book.chapters())
+
+    def test_35(self):
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+        d0 = dict((['sort0', False], ['cover', "abc.jpg"], ['output0', "abc.m4b"]))
+        book = Book(files, **d0)
+
 
 #
 # The sys.argv line will complain to you if you run it with ipython
