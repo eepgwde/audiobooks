@@ -89,6 +89,7 @@ class Track(object):
     self._quality0 = val
         
   def __lt__(self, other):
+    logger.warning("lt: ")
     return self.disc_track < other.disc_track
 
   def __unicode__(self):

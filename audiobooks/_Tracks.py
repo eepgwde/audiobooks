@@ -33,7 +33,7 @@ class Tracks(UserList):
     
   """List of audio"""
   def __init__(self, fnames, **kwargs):
-    super().__init__(self.load(fnames, sort0=kwargs.get('sort0', False)))
+    super().__init__(self.load(fnames, sort0=kwargs.get('sort', False)))
     self.set_delegate(kwargs.get('delegate0', "before"))
     self.fnames = fnames
 

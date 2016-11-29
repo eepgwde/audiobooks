@@ -164,7 +164,7 @@ class Test(unittest.TestCase):
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
 
-        d0 = dict([['sort0', True], ['input', files], ['files', []]])
+        d0 = dict([['sort', True], ['input', files], ['files', []]])
         book = Book(**d0)
         self.logger.info("book: " + str(book))
         self.logger.info("book[0]: album: " + str(book[0].album))
@@ -174,7 +174,7 @@ class Test(unittest.TestCase):
 
     def test_43(self):
         logger.info("test_43")
-        d0 = dict([['sort0', True]])
+        d0 = dict([['sort', True]])
         d0['files'] = []
         d0['input'] = type(self).dir0
         book = Book(**d0)
@@ -185,7 +185,7 @@ class Test(unittest.TestCase):
         files = []
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
-        d0 = dict([['sort0', False]])
+        d0 = dict([['sort', False]])
         d0['files'] = trs0
         d0['input'] = []
         d0['cover'] = "abc.jpg"

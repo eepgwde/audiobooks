@@ -16,12 +16,11 @@ Options:
   -l, --log                             Enable gmusicapi logging.
   -d, --dry-run                         Output options and files
   -q, --quiet                           Don't output status messages.
-  -v, --verbose                         Output status messages.
+  -o, FILE, --output FILE               Output .m4b file.
   --sort                                Sort tracks by disc and track number 
   -v, --verbose                         Output status messages.
                                         With -l,--log will display warnings.
                                         With -d,--dry-run will show parameters.
-  -o FILE, --output FILE                Output filename to write to.
   -f FILE, --files FILE                 File containing files.
   --cover FILE                          Add a file of cover-art
   -c COMMAND, --command COMMAND         What to do: chapters
@@ -160,42 +159,20 @@ def cli_run(argv):
             sh = logging.StreamHandler()
             logger.addHandler(sh)
         logger.debug('cli: ' + type(cli).__name__)
-        logger.debug('cli: ' + str(cli.get('sort0', False)))
-
-    default0 = lambda x, d: d if x is None else x
-    default1 = lambda x, d: d if isinstance(list, x) and len(x) == 0 else x
-
-    output0 = default0(cli['output'], None)
-    
-    cover1 = "{:s}.jpg".format('cover')
-    cover0 = default0(cli['cover'], cover1)
-
-    book = None
 
     book = Book(**cli)
     
-    if len(cli['input']) == 1:
-        book = Book(cli['input'][0], sort0 = default0(cli['sort'], True))
-    elif isinstance(cli['input'], list) and len(cli['input']) > 1:
-        book = Book(cli['input'], sort0 = default0(cli['sort'], False))
-    elif cli['files']:
-        logger.debug('files: ')
-        x0 = cli['files']
-        with open(x0, encoding="utf-8") as f:
-            files = f.read().splitlines()
-            book = Book(files, sort0 = default0(cli['sort'], False))
-
     if book is None:
-        logger.warning("no book")
-        return
+        raise RuntimeError('no book')
+
+    default0 = lambda x, d: d if x is None else x
 
     command1 = "chapters"
     command0 = default0(cli['command'], command1)
     command0 = command0.split(',')
     
     logger.info('book: ' + type(book).__name__)
-    logger.info('book: ' + str(len(book)))
-    logger.info('book: bits: ' + output0 + "; " + cover0)
+    logger.info('book: ' + str(book))
     logger.info('book: commands: ' + "; ".join(command0))
 
     if cli['dry-run']: return

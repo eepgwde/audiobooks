@@ -41,17 +41,17 @@ CHAPTER{0:d}NAME={2:s}
 
     default0 = lambda x, d: d if x is None else x
     if len(kwargs['input']) == 1:
-      self.tracks = Tracks(kwargs['input'][0], sort0 = default0(kwargs['sort0'], True))
+      self.tracks = Tracks(kwargs['input'][0], sort = default0(kwargs['sort'], True))
     elif isinstance(kwargs['input'], list) and len(kwargs['input']) > 1:
-      self.tracks = Tracks(kwargs['input'], sort0 = default0(kwargs['sort0'], False))
+      self.tracks = Tracks(kwargs['input'], sort = default0(kwargs['sort'], False))
     elif kwargs['files']:
       logger.debug('files: ')
       x0 = kwargs['files']
       with open(x0, encoding="utf-8") as f:
         files = f.read().splitlines()
-        self.tracks = Tracks(files, sort0 = default0(kwargs['sort0'], False))
+        self.tracks = Tracks(files, sort = default0(kwargs['sort'], False))
 
-    output0 = kwargs.get('output0', None)
+    output0 = kwargs.get('output', None)
     if output0 is None:
       try:
         output0 = "{:s}.m4b".format(unidecode(self[0].album))
@@ -60,7 +60,7 @@ CHAPTER{0:d}NAME={2:s}
         logger.warning("Book: ctr: failed: output")
     self.output0 = output0
 
-    cover0 = kwargs.get('cover0', None)
+    cover0 = kwargs.get('cover', None)
     if cover0 is None:
       try:
         cover0 = "{:s}.jpg".format(unidecode(self[0].album))
