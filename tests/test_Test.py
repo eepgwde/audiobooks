@@ -164,25 +164,33 @@ class Test(unittest.TestCase):
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
 
-        book = Book(files, sort0=True)
+        d0 = dict([['sort0', True], ['input', files], ['files', []]])
+        book = Book(**d0)
         self.logger.info("book: " + str(book))
         self.logger.info("book[0]: album: " + str(book[0].album))
         chapters = book.chapters()
         self.logger.info("chapters: " + str(len(chapters)))
         self.logger.info("book: " + '\n'.join(chapters))
 
-    def test_33(self):
-        book = Book(type(self).dir0, sort0=True)
+    def test_43(self):
+        logger.info("test_43")
+        d0 = dict([['sort0', True]])
+        d0['files'] = []
+        d0['input'] = type(self).dir0
+        book = Book(**d0)
         file1 = sys.stdout
         file1.writelines(book.chapters())
 
-    def test_35(self):
+    def test_45(self):
         files = []
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
-        d0 = dict((['sort0', False], ['cover', "abc.jpg"], ['output0', "abc.m4b"]))
-        book = Book(files, **d0)
-
+        d0 = dict([['sort0', False]])
+        d0['files'] = trs0
+        d0['input'] = []
+        d0['cover'] = "abc.jpg"
+        d0['output0'] = "abc.m4b"
+        book = Book(**d0)
 
 #
 # The sys.argv line will complain to you if you run it with ipython

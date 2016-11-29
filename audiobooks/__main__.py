@@ -159,9 +159,8 @@ def cli_run(argv):
         if cli['verbose']:
             sh = logging.StreamHandler()
             logger.addHandler(sh)
-
-    for k in cli.items():
-        logger.info(k)
+        logger.debug('cli: ' + type(cli).__name__)
+        logger.debug('cli: ' + str(cli.get('sort0', False)))
 
     default0 = lambda x, d: d if x is None else x
     default1 = lambda x, d: d if isinstance(list, x) and len(x) == 0 else x
@@ -172,6 +171,9 @@ def cli_run(argv):
     cover0 = default0(cli['cover'], cover1)
 
     book = None
+
+    book = Book(**cli)
+    
     if len(cli['input']) == 1:
         book = Book(cli['input'][0], sort0 = default0(cli['sort'], True))
     elif isinstance(cli['input'], list) and len(cli['input']) > 1:

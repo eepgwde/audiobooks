@@ -30,14 +30,26 @@ CHAPTER{0:d}NAME={2:s}
   MERGE_COMMAND = "MP4Box"
   CHAPS_COMMAND = "mp4chaps"
 
+
   """
   List of audio filenames or a directory string is passed.
   Use the lookback.
   """
-  def __init__(self, fnames, **kwargs):
-    self.fnames = fnames
-    sort0 = kwargs.get('sort0', False)
-    self.tracks = Tracks(fnames, sort0 = sort0)
+  def __init__(self, **kwargs):
+    for k in kwargs.items():
+      logger.info(k)
+
+    default0 = lambda x, d: d if x is None else x
+    if len(kwargs['input']) == 1:
+      self.tracks = Tracks(kwargs['input'][0], sort0 = default0(kwargs['sort0'], True))
+    elif isinstance(kwargs['input'], list) and len(kwargs['input']) > 1:
+      self.tracks = Tracks(kwargs['input'], sort0 = default0(kwargs['sort0'], False))
+    elif kwargs['files']:
+      logger.debug('files: ')
+      x0 = kwargs['files']
+      with open(x0, encoding="utf-8") as f:
+        files = f.read().splitlines()
+        self.tracks = Tracks(files, sort0 = default0(kwargs['sort0'], False))
 
     output0 = kwargs.get('output0', None)
     if output0 is None:
