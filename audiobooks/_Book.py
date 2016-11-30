@@ -9,6 +9,10 @@ from unidecode import unidecode
 import glob
 import os
 
+from mutagen.easymp4 import EasyMP4
+from mutagen.mp4 import MP4Cover, MP4
+from mutagen.mp4 import AtomDataType
+
 from cached_property import cached_property
 
 from weaves import singledispatch1, Singleton
@@ -23,13 +27,13 @@ class Book(object):
   tracks = None
   output0 = None
   cover0 = None
+  nodo = False
 
   CHAPTER_TEMPLATE = """CHAPTER{0:d}={1:s}
 CHAPTER{0:d}NAME={2:s}
 """
   MERGE_COMMAND = "MP4Box"
   CHAPS_COMMAND = "mp4chaps"
-
 
   """
   List of audio filenames or a directory string is passed.
@@ -38,6 +42,8 @@ CHAPTER{0:d}NAME={2:s}
   def __init__(self, **kwargs):
     for k in kwargs.items():
       logger.info(k)
+
+    self.nodo = kwargs.get('dry-run', False)
 
     default0 = lambda x, d: d if x is None else x
     if len(kwargs['input']) == 1:
@@ -83,7 +89,7 @@ CHAPTER{0:d}NAME={2:s}
   def __len__(self): 
     return len(self.tracks)
 
-  def chapters(self):
+  def chapters0(self):
     """
     Generate chapter marks and write to filename is given.
     @note
@@ -95,9 +101,68 @@ CHAPTER{0:d}NAME={2:s}
       s0 = self.CHAPTER_TEMPLATE.format \
 (track_number + 1, tm0, unidecode(track.title))
       lines.append(s0)
-    return lines
+    self._chapters = lines
+    return self._chapters
 
-  def write(self):
-    return
+  def metadata(self, **kwargs):
+    """Write album and artist information to audiobook file
 
+    changes output_fname on the fly, expects album and artist"""
+    track = EasyMP4(self.output0)
+    track['album'] = kwargs.get('album', self[0].album)
+    track['title'] = track['album']
+    track['artist'] = kwargs.get('artist', self[0].artist)
+    if not self.nodo: track.save()
   
+  def cover(self, **kwargs):
+    """Write cover image to audiobook file
+
+    changes output_fname on the fly, expects cover_fname"""
+    self.cover0 = kwargs.get('cover', self.cover0)
+    if self.cover0.endswith('png'):
+      picture_type = AtomDataType.PNG
+    elif self.cover0.endswith('jpg') or self.cover0.endswith('jpeg'):
+      picture_type = AtomDataType.JPEG
+    
+    with open(self.cover0, 'rb') as file0:
+      art0 = MP4Cover(data=file0.read(), imageformat=picture_type)
+      track = MP4(self.output0)
+      track['covr'] = [art0]
+      if not self.nodo: track.save()
+
+  def write(self, **kwargs):
+    """combine m4a files to one big file
+    writes to output_fname, expects track list as input"""
+    merger0 = []
+    merger1 = -1
+    merger0.insert(0, self.MERGE_COMMAND)
+    for track in self.tracks:
+      merger0.append('-cat')
+      merger0.append(track.filename)
+
+    merger0.append(self.output0)
+
+    if self.nodo:
+      logger.info("write: cmd: " + '; '.join(merger0))
+    else:
+      merger1 = subprocess.call(merger0)
+      if merger1 != 0:
+        raise RuntimeError('Merge unsuccessful')
+    return self.output0
+
+  def chapters(self, **kwargs):
+    """combine m4a files to one big file
+    writes to output_fname, expects track list as input"""
+    merger0 = []
+    merger1 = -1
+    merger0.insert(0, self.MERGE_COMMAND)
+    merger0.extend(['-chap', fchaps])
+    merger0.append(self.output0)
+    if self.nodo:
+      logger.info("write: cmd: " + '; '.join(merger0))
+    else:
+      merger1 = subprocess.call(merger0)
+      if merger1 != 0:
+        raise RuntimeError('Merge unsuccessful')
+    return self.output0
+

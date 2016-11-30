@@ -96,6 +96,7 @@ class Test(unittest.TestCase):
         self.logger.info('test1: ' + str(test1))
         self.logger.info('test1: duration: ' + str(test1.duration))
         self.logger.info('test1: duration1: ' + str(test1.duration1))
+        self.logger.info('test1: filename: ' + str(test1.filename))
 
     def test_02(self):
         self.logger.info('test_02')
@@ -168,7 +169,7 @@ class Test(unittest.TestCase):
         book = Book(**d0)
         self.logger.info("book: " + str(book))
         self.logger.info("book[0]: album: " + str(book[0].album))
-        chapters = book.chapters()
+        chapters = book.chapters0()
         self.logger.info("chapters: " + str(len(chapters)))
         self.logger.info("book: " + '\n'.join(chapters))
 
@@ -176,10 +177,10 @@ class Test(unittest.TestCase):
         logger.info("test_43")
         d0 = dict([['sort', True]])
         d0['files'] = []
-        d0['input'] = type(self).dir0
+        d0['input'] = [ type(self).dir0 ]
         book = Book(**d0)
         file1 = sys.stdout
-        file1.writelines(book.chapters())
+        file1.writelines(book.chapters0())
 
     def test_45(self):
         files = []
@@ -191,6 +192,19 @@ class Test(unittest.TestCase):
         d0['cover'] = "abc.jpg"
         d0['output0'] = "abc.m4b"
         book = Book(**d0)
+
+    def test_47(self):
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+        d0 = dict([['sort', False]])
+        d0['files'] = trs0
+        d0['input'] = []
+        d0['dry-run'] = True
+        d0['cover'] = "abc.jpg"
+        d0['output0'] = "abc.m4b"
+        book = Book(**d0)
+        book.write()
 
 #
 # The sys.argv line will complain to you if you run it with ipython

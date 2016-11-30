@@ -21,8 +21,7 @@ class Track(object):
   _quality0 = None
   
   def __init__(self, fname):
-    self.fname = fname
-    self._track = EasyMP4(self.fname)
+    self._track = EasyMP4(fname)
     logger.info("Track: ctr: " + type(self._track).__name__)
 
   @cached_property
@@ -70,6 +69,11 @@ class Track(object):
     """get album name"""
     track_album = self._track['album'][0]
     return track_album
+
+  @property
+  def filename(self):
+    """get underlying filename"""
+    return getattr(self._track, 'filename')
         
   @cached_property
   def artist(self):

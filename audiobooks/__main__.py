@@ -175,14 +175,14 @@ def cli_run(argv):
     logger.info('book: ' + str(book))
     logger.info('book: commands: ' + "; ".join(command0))
 
-    if cli['dry-run']: return
-
     for cmd in command0:
         logger.info('cmd: ' + cmd + "; " +type(cmd).__name__ )
         r0 = book.__getattribute__(cmd)()
         if r0 is not None: 
             if isinstance(r0, list):
                 print(*r0, sep='')
+
+    if cli['dry-run']: return
 
     return
         
