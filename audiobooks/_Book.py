@@ -8,6 +8,7 @@ from unidecode import unidecode
 
 import glob
 import os
+import subprocess
 
 from tempfile import mkstemp
 from mutagen.easymp4 import EasyMP4
@@ -175,3 +176,9 @@ CHAPTER{0:d}NAME={2:s}
       if merger1 != 0:
         raise RuntimeError('Merge unsuccessful')
     return self.output0
+
+  def remove(self, **kwargs):
+    try:
+      if not self.nodo: os.remove(self.output0)
+    except:
+      logger.warning("remove: " + self.output0)
