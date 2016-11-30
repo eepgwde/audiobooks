@@ -1,3 +1,7 @@
+"""
+Test file for the audiobooks modules.
+
+"""
 ## @file Test.py
 # @author weaves
 # @brief Unittest
@@ -26,16 +30,14 @@ logger.addHandler(sh)
 media0 = os.path.join(os.path.dirname(__file__), "media")
 trs0 = os.path.join(os.path.dirname(__file__), "p1.lst")
 
-## A test driver for GMus0
-#
-# @see GMus0
 class Test(unittest.TestCase):
     """
-    Test MInfo
+    A source directory dir0 is taken from the environment as SDIR or 
+    is tests/media and should contain .m4a files.
+    A file tests/p1.lst is also needed. It can list the files in the
+    directory.
     """
     test0 = None
-    gmus0 = None
-    nums = [-1, 0, 1, 2, 3]
     dir0 = None
     files = []
     logger = None
@@ -45,7 +47,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         global logger
         cls.logger = logger
-        
+        global media0
         cls.dir0 = os.environ['SDIR'] if os.environ.get('SDIR') is not None else media0
         
         for root, dirs, files in os.walk(cls.dir0, topdown=True):
@@ -127,6 +129,7 @@ class Test(unittest.TestCase):
         Don't sort these, use the file order.
         """
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
 
@@ -139,6 +142,7 @@ class Test(unittest.TestCase):
         As the earlier test, but demonstrate that the sorting works.
         """
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
 
@@ -151,6 +155,7 @@ class Test(unittest.TestCase):
         Time functions
         """
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
 
@@ -162,6 +167,7 @@ class Test(unittest.TestCase):
 
     def test_30(self):
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
 
@@ -184,6 +190,7 @@ class Test(unittest.TestCase):
 
     def test_45(self):
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
         d0 = dict([['sort', False]])
@@ -195,6 +202,7 @@ class Test(unittest.TestCase):
 
     def test_47(self):
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
         d0 = dict([['sort', False]])
@@ -208,6 +216,7 @@ class Test(unittest.TestCase):
 
     def test_49(self):
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
         d0 = dict([['sort', False]])
@@ -222,6 +231,7 @@ class Test(unittest.TestCase):
 
     def test_51(self):
         files = []
+        global trs0
         with open(trs0, encoding="utf-8") as f:
             files = f.read().splitlines()
         d0 = dict([['sort', False]])
@@ -246,4 +256,5 @@ if __name__ == '__main__':
         # If not remove the command-line arguments.
         sys.argv = [sys.argv[0]]
         unittest.main(module='Test', verbosity=3, failfast=True, exit=False)
+
 

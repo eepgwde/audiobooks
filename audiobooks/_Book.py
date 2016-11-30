@@ -37,7 +37,6 @@ class Book(object):
 CHAPTER{0:d}NAME={2:s}
 """
   MERGE_COMMAND = "MP4Box"
-  CHAPS_COMMAND = "mp4chaps"
 
   def __init__(self, **kwargs):
     """Initialize an audiobook container. Accepts keys that are typically
@@ -119,11 +118,13 @@ CHAPTER{0:d}NAME={2:s}
     """Write album and artist information to audiobook file.
 
     Changes the filename, expects album and artist to be defined by the first track"""
+    if self.nodo: return
+    
     track = EasyMP4(self.output0)
     track['album'] = kwargs.get('album', self[0].album)
     track['title'] = track['album']
     track['artist'] = kwargs.get('artist', self[0].artist)
-    if not self.nodo: track.save()
+    track.save()
   
   def cover(self, **kwargs):
     """Write cover image to audiobook file"""
@@ -132,22 +133,36 @@ CHAPTER{0:d}NAME={2:s}
       picture_type = AtomDataType.PNG
     elif self.cover0.endswith('jpg') or self.cover0.endswith('jpeg'):
       picture_type = AtomDataType.JPEG
+    if self.nodo: return
     
+    logger.debug("cover: " + self.cover0)
     with open(self.cover0, 'rb') as file0:
       art0 = MP4Cover(data=file0.read(), imageformat=picture_type)
       track = MP4(self.output0)
       track['covr'] = [art0]
-      if not self.nodo: track.save()
+      track.save()
 
   def write(self, **kwargs):
     """combine m4a files to one big file
     writes to output_fname, expects track list as input"""
     merger0 = []
     merger1 = -1
+    h0, *t0 = self.tracks
+
     merger0.insert(0, self.MERGE_COMMAND)
-    for track in self.tracks:
+    merger0.append('-add')
+    merger0.append(h0.filename)
+    merger0.append(self.output0)
+    if self.nodo:
+      logger.info("write: cmd: " + '; '.join(merger0))
+    else:
+      merger1 = subprocess.call(merger0)
+    
+    merger0 = []
+    merger0.insert(0, self.MERGE_COMMAND)
+    for t1 in t0:
       merger0.append('-cat')
-      merger0.append(track.filename)
+      merger0.append('{:s}#audio'.format(t1.filename))
 
     merger0.append(self.output0)
 
@@ -155,8 +170,6 @@ CHAPTER{0:d}NAME={2:s}
       logger.info("write: cmd: " + '; '.join(merger0))
     else:
       merger1 = subprocess.call(merger0)
-      if merger1 != 0:
-        raise RuntimeError('Merge unsuccessful')
     return self.output0
 
   def chapters(self, **kwargs):

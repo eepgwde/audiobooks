@@ -67,10 +67,18 @@ from tempfile import mkstemp
 
 import logging
 
-logger = None
+QUIET = 25
+logging.addLevelName(25, "QUIET")
+logging.basicConfig(filename='audiobooks.log', level=QUIET)
+global logger
+logger = logging.getLogger('Test')
 
-def main(argv):
+def main():
     global cli
+    global logger
+
+    argv = sys.argv
+    
     cli = dict((key.lstrip("-<").rstrip(">"), value) for key, value in docopt(__doc__).items())
 
     enable_logging = cli['log']
@@ -109,9 +117,4 @@ def main(argv):
                 print(*r0, sep='')
 
 if __name__ == '__main__':
-    QUIET = 25
-    logging.addLevelName(25, "QUIET")
-    logging.basicConfig(filename='audiobooks.log', level=QUIET)
-    global logger
-    logger = logging.getLogger('Test')
     raise SystemExit(main(sys.argv))
