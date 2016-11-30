@@ -206,6 +206,20 @@ class Test(unittest.TestCase):
         book = Book(**d0)
         book.write()
 
+    def test_49(self):
+        files = []
+        with open(trs0, encoding="utf-8") as f:
+            files = f.read().splitlines()
+        d0 = dict([['sort', False]])
+        d0['files'] = trs0
+        d0['input'] = []
+        d0['dry-run'] = True
+        d0['cover'] = "abc.jpg"
+        d0['output0'] = "abc.m4b"
+        book = Book(**d0)
+        book.chapters0()
+        book.chapters()
+
 #
 # The sys.argv line will complain to you if you run it with ipython
 # emacs. The ipython arguments are passed to unittest.main.

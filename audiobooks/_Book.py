@@ -9,6 +9,7 @@ from unidecode import unidecode
 import glob
 import os
 
+from tempfile import mkstemp
 from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
@@ -22,7 +23,6 @@ from audiobooks._Tracks import Tracks
 logger = logging.getLogger('Test')
 
 class Book(object):
-
   _chapters = []
   tracks = None
   output0 = None
@@ -153,6 +153,15 @@ CHAPTER{0:d}NAME={2:s}
   def chapters(self, **kwargs):
     """combine m4a files to one big file
     writes to output_fname, expects track list as input"""
+
+    if len(self._chapters) <= 0: self.chapters0()
+    if len(self._chapters) <= 0:
+      raise RuntimeError("no chapters")
+
+    fchaps = mkstemp(prefix='chaplist')[1]
+    with open(fchaps, 'w') as file0:
+      file0.writelines(self._chapters)
+    
     merger0 = []
     merger1 = -1
     merger0.insert(0, self.MERGE_COMMAND)
@@ -162,7 +171,7 @@ CHAPTER{0:d}NAME={2:s}
       logger.info("write: cmd: " + '; '.join(merger0))
     else:
       merger1 = subprocess.call(merger0)
+      if not self.nodo: os.remove(fchaps)
       if merger1 != 0:
         raise RuntimeError('Merge unsuccessful')
     return self.output0
-
