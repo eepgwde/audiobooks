@@ -1,7 +1,10 @@
+"""
+@author weaves
+
+Container class for Tracks forming an AudioBook.
+
+"""
 # -*- coding: utf-8 -*-
-## @author weaves
-##
-## Container class for Tracks forming an AudioBook.
 
 import logging
 from unidecode import unidecode
@@ -36,11 +39,16 @@ CHAPTER{0:d}NAME={2:s}
   MERGE_COMMAND = "MP4Box"
   CHAPS_COMMAND = "mp4chaps"
 
-  """
-  List of audio filenames or a directory string is passed.
-  Use the lookback.
-  """
   def __init__(self, **kwargs):
+    """Initialize an audiobook container. Accepts keys that are typically
+    command-line arguments: 
+    - dry-run, boolean, do nothing if True
+    - input, a list of files to include in the book;
+    - sort, a boolean, should the files be sorted on disc and track number
+    - files, a string for the path to a file that contains files
+    - output, string, output filename
+    - cover, string, source filename for an image
+    """
     for k in kwargs.items():
       logger.info(k)
 
@@ -77,17 +85,19 @@ CHAPTER{0:d}NAME={2:s}
     self.cover0 = cover0
 
   def __repr__(self):
-    """utf-8 formatted text representation"""
-    default0 = lambda x,d: d if x is None else x
+    """ASCII formatted text representation"""
+    default0 = lambda x,d: d if x is None else unidecode(x)
     
     s0 = "\"{0:s}\" \"{1:s}\"".format \
 (default0(self.output0, ""), default0(self.cover0, ""))
     return "( {0:s} : {1:s} )".format(s0, str(self.tracks))
 
   def __getitem__(self, i): 
+    """Indexed access: return the track at the i-th position """
     return self.tracks[i]
 
-  def __len__(self): 
+  def __len__(self):
+    """The number of tracks"""
     return len(self.tracks)
 
   def chapters0(self):
@@ -106,9 +116,9 @@ CHAPTER{0:d}NAME={2:s}
     return self._chapters
 
   def metadata(self, **kwargs):
-    """Write album and artist information to audiobook file
+    """Write album and artist information to audiobook file.
 
-    changes output_fname on the fly, expects album and artist"""
+    Changes the filename, expects album and artist to be defined by the first track"""
     track = EasyMP4(self.output0)
     track['album'] = kwargs.get('album', self[0].album)
     track['title'] = track['album']
@@ -116,9 +126,7 @@ CHAPTER{0:d}NAME={2:s}
     if not self.nodo: track.save()
   
   def cover(self, **kwargs):
-    """Write cover image to audiobook file
-
-    changes output_fname on the fly, expects cover_fname"""
+    """Write cover image to audiobook file"""
     self.cover0 = kwargs.get('cover', self.cover0)
     if self.cover0.endswith('png'):
       picture_type = AtomDataType.PNG
@@ -152,8 +160,9 @@ CHAPTER{0:d}NAME={2:s}
     return self.output0
 
   def chapters(self, **kwargs):
-    """combine m4a files to one big file
-    writes to output_fname, expects track list as input"""
+    """Attach a chapters menu to the file book.
+
+    This will invoke chapters0() if necessary."""
 
     if len(self._chapters) <= 0: self.chapters0()
     if len(self._chapters) <= 0:
@@ -178,6 +187,7 @@ CHAPTER{0:d}NAME={2:s}
     return self.output0
 
   def remove(self, **kwargs):
+    """Delete the output file"""
     try:
       if not self.nodo: os.remove(self.output0)
     except:

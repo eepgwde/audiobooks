@@ -1,31 +1,46 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 """
-Create an audiobook from files given as input or from a file and output to file.
+Create an audiobook with chapters from files given as input.
 
 Usage:
   audiobooks (-h | --help)
   audiobooks [-o FILE] [options] (--files FILE | <input>...)
 
 Arguments:
-  input                                 A directory of files or a file to update
+  input                                 A directory of files or a file to update or 
+                                        a glob pattern
 
 Options:
   -h, --help                            Display help message.
   -l, --log                             Enable gmusicapi logging.
   -d, --dry-run                         Output options and files
   -q, --quiet                           Don't output status messages.
-  -o, FILE, --output FILE               Output .m4b file.
+  -o, FILE, --output FILE               Output .m4b file. Default: output.m4b
   --sort                                Sort tracks by disc and track number 
   -v, --verbose                         Output status messages.
                                         With -l,--log will display warnings.
                                         With -d,--dry-run will show parameters.
   -f FILE, --files FILE                 File containing files.
-  --cover FILE                          Add a file of cover-art
-  -c COMMAND, --command COMMAND         What to do: chapters
+  --cover FILE                          Add a file of cover-art. Default: cover.jpg
+  -c COMMAND, --command COMMAND         What to do: remove,write,cover,chapters
 
 Patterns can be any valid Python regex patterns.
+
+Commands:
+
+ remove will remove any pre-existing file with the output filename
+ write combines the .m4a files into one the output file using MP4Box
+ cover will install the image file into the output M4B file
+ chapters will install a chapter menu into the file
+
+Note:
+
+ If you don't have MP4Box installed, you can get a chapter list with the command
+ of chapters.
+
 """
 
 from __future__ import print_function;
@@ -52,13 +67,9 @@ from tempfile import mkstemp
 
 import logging
 
-QUIET = 25
-logging.addLevelName(25, "QUIET")
+logger = None
 
-logging.basicConfig(filename='audiobooks.log', level=QUIET)
-logger = logging.getLogger('Test')
-
-def main0(argv):
+def main(argv):
     global cli
     cli = dict((key.lstrip("-<").rstrip(">"), value) for key, value in docopt(__doc__).items())
 
@@ -97,9 +108,10 @@ def main0(argv):
             if isinstance(r0, list):
                 print(*r0, sep='')
 
-def main():
-    """entrypoint without arguments"""
-    raise SystemExit(main0(sys.argv))
-
 if __name__ == '__main__':
-    main()
+    QUIET = 25
+    logging.addLevelName(25, "QUIET")
+    logging.basicConfig(filename='audiobooks.log', level=QUIET)
+    global logger
+    logger = logging.getLogger('Test')
+    raise SystemExit(main(sys.argv))
