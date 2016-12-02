@@ -37,6 +37,7 @@ class Book(object):
 CHAPTER{0:d}NAME={2:s}
 """
   MERGE_COMMAND = "MP4Box"
+  QT_COMMAND = "mp4chaps"
 
   def __init__(self, **kwargs):
     """Initialize an audiobook container. Accepts keys that are typically
@@ -99,6 +100,17 @@ CHAPTER{0:d}NAME={2:s}
     """The number of tracks"""
     return len(self.tracks)
 
+  def _duration(self, track):
+    """return the duration as a string for use."""
+    dt0 = Singleton.instance().tm2dt(track.duration1)
+    tm0 = Singleton.instance().dt2tm1(dt0)
+    return tm0
+
+  def _cumulative(self, track):
+    """return the duration as a string for use."""
+    tm0 = Singleton.instance().dt2tm1(track.quality0)
+    return tm0
+
   def chapters0(self):
     """
     Generate chapter marks and write to filename is given.
@@ -107,7 +119,7 @@ CHAPTER{0:d}NAME={2:s}
     """
     lines = []
     for track_number, track in enumerate(self.tracks):
-      tm0 = Singleton.instance().dt2tm1(track.quality0)
+      tm0 = self._cumulative(track)
       s0 = self.CHAPTER_TEMPLATE.format \
 (track_number + 1, tm0, unidecode(track.title))
       lines.append(s0)
@@ -142,34 +154,38 @@ CHAPTER{0:d}NAME={2:s}
       track['covr'] = [art0]
       track.save()
 
+  def _invoke(self, cmd):
+    merger1 = -1
+    if self.nodo:
+      logger.info("write: cmd: " + '; '.join(cmd))
+    else:
+      merger1 = subprocess.call(cmd)
+    return merger1
+
   def write(self, **kwargs):
     """combine m4a files to one big file
-    writes to output_fname, expects track list as input"""
-    merger0 = []
-    merger1 = -1
+    writes to the output file name, make sure files are encoded to same 
+    audio quality"""
+    if len(self.tracks) <= 0:
+      raise RuntimeError("no tracks")
+    
     h0, *t0 = self.tracks
 
+    tag = "#audio"
+    merger0 = []
     merger0.insert(0, self.MERGE_COMMAND)
-    merger0.append('-add')
-    merger0.append(h0.filename)
+    merger0.extend(['-add', '{0:s}{1:s}'.format(h0.filename, tag) ])
+    merger0.append("-new")
     merger0.append(self.output0)
-    if self.nodo:
-      logger.info("write: cmd: " + '; '.join(merger0))
-    else:
-      merger1 = subprocess.call(merger0)
-    
+    self._invoke(merger0)
+
     merger0 = []
     merger0.insert(0, self.MERGE_COMMAND)
     for t1 in t0:
-      merger0.append('-cat')
-      merger0.append('{:s}#audio'.format(t1.filename))
-
+      merger0.extend(['-cat', '{0:s}{1:s}'.format(t1.filename, tag) ])
     merger0.append(self.output0)
 
-    if self.nodo:
-      logger.info("write: cmd: " + '; '.join(merger0))
-    else:
-      merger1 = subprocess.call(merger0)
+    self._invoke(merger0)
     return self.output0
 
   def chapters(self, **kwargs):
@@ -197,6 +213,23 @@ CHAPTER{0:d}NAME={2:s}
       if not self.nodo: os.remove(fchaps)
       if merger1 != 0:
         raise RuntimeError('Merge unsuccessful')
+    return self.output0
+
+  def quicktime(self, **kwargs):
+    """Convert chapters to QuickTime."""
+
+    merger0 = []
+    merger1 = -1
+    merger0.insert(0, self.QT_COMMAND)
+    merger0.append("-c")
+    merger0.append("-Q")
+    merger0.append(self.output0)
+    if self.nodo:
+      logger.info("write: cmd: " + '; '.join(merger0))
+    else:
+      merger1 = subprocess.call(merger0)
+      if merger1 != 0:
+        raise RuntimeError('QuickTime chapters failed')
     return self.output0
 
   def remove(self, **kwargs):

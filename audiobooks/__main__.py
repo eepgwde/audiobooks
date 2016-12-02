@@ -35,11 +35,14 @@ Commands:
  write combines the .m4a files into one the output file using MP4Box
  cover will install the image file into the output M4B file
  chapters will install a chapter menu into the file
+ quicktime will convert chapters to the QuickTime format
+
+ chapters0 will print out the chapters entries to the console
 
 Note:
 
  If you don't have MP4Box installed, you can get a chapter list with the command
- of chapters.
+ of chapters0.
 
 """
 
@@ -116,5 +119,3 @@ def main():
             if isinstance(r0, list):
                 print(*r0, sep='')
 
-if __name__ == '__main__':
-    raise SystemExit(main(sys.argv))
