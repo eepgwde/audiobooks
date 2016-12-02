@@ -172,20 +172,25 @@ CHAPTER{0:d}NAME={2:s}
     h0, *t0 = self.tracks
 
     tag = "#audio"
+    tag = ""
+
     merger0 = []
     merger0.insert(0, self.MERGE_COMMAND)
-    merger0.extend(['-add', '{0:s}{1:s}'.format(h0.filename, tag) ])
+
+    for t1 in [h0]:
+      merger0.extend(['-add', '{0:s}{1:s}'.format(t1.filename, tag) ])
     merger0.append("-new")
     merger0.append(self.output0)
     self._invoke(merger0)
 
     merger0 = []
     merger0.insert(0, self.MERGE_COMMAND)
+
     for t1 in t0:
       merger0.extend(['-cat', '{0:s}{1:s}'.format(t1.filename, tag) ])
     merger0.append(self.output0)
-
     self._invoke(merger0)
+
     return self.output0
 
   def chapters(self, **kwargs):
