@@ -18,6 +18,8 @@ Options:
   -l, --log                             Enable gmusicapi logging.
   -d, --dry-run                         Output options and files
   -q, --quiet                           Don't output status messages.
+  --tmp DIR                             Pass this directory to use for 
+                                        temporary files (otherwise use TMPDIR and then TMP)
   -o, FILE, --output FILE               Output .m4b file. Default: output.m4b
   --sort                                Sort tracks by disc and track number 
   -v, --verbose                         Output status messages.
@@ -104,6 +106,11 @@ def main():
 
     default0 = lambda x, d: d if x is None else x
 
+    if cli['tmp'] is None:
+        cli['tmp'] = os.environ['TMPDIR'] if os.environ.get('TMPDIR') else cli['tmp']
+        if cli['tmp'] is None:
+            cli['tmp'] = os.environ['TMP'] if os.environ.get('TMP') else cli['tmp']
+        
     command1 = "chapters"
     command0 = default0(cli['command'], command1)
     command0 = command0.split(',')

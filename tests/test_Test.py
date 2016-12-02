@@ -1,6 +1,8 @@
 """
 Test file for the audiobooks modules.
 
+Don't forget to test a large file.
+
 """
 ## @file Test.py
 # @author weaves
@@ -225,6 +227,7 @@ class Test(unittest.TestCase):
         d0['dry-run'] = True
         d0['cover'] = "tests/walser.jpg"
         d0['output0'] = "/misc/tmp/3/walser.m4b"
+        d0['tmp'] = os.environ['TMP'] if os.environ.get('TMP') else '/tmp'
         book = Book(**d0)
         book.chapters0()
         book.chapters()
@@ -239,8 +242,12 @@ class Test(unittest.TestCase):
         d0['input'] = []
         d0['cover'] = "tests/walser.jpg"
         d0['output'] = "/misc/tmp/3/walser.m4b"
+        d0['tmp'] = os.environ['TMP'] if os.environ.get('TMP') else '/tmp'
+
         book = Book(**d0)
+        book.remove()
         book.write()
+        book.metadata()
         book.cover()
         book.chapters()
 

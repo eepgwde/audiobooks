@@ -48,7 +48,7 @@ dist-local:
 	python setup.py sdist
 
 install: uninstall dist-local
-	pip3 install -e . --user
+	pip3 install --no-deps -e . --user
 
 clean::
 	-$(SHELL) -c "find . -type d -name __pycache__ -exec rm -rf {} \;"

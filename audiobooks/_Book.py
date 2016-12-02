@@ -3,6 +3,8 @@
 
 Container class for Tracks forming an AudioBook.
 
+Be sure that the TMP directory is large enough.
+
 """
 # -*- coding: utf-8 -*-
 
@@ -13,7 +15,7 @@ import glob
 import os
 import subprocess
 
-from tempfile import mkstemp
+from tempfile import mkstemp, gettempdir
 from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
@@ -32,6 +34,7 @@ class Book(object):
   output0 = None
   cover0 = None
   nodo = False
+  tmp = None
 
   CHAPTER_TEMPLATE = """CHAPTER{0:d}={1:s}
 CHAPTER{0:d}NAME={2:s}
@@ -55,6 +58,10 @@ CHAPTER{0:d}NAME={2:s}
     self.nodo = kwargs.get('dry-run', False)
 
     default0 = lambda x, d: d if x is None else x
+
+    self.tmp = default0(kwargs['tmp'], gettempdir())
+    logger.info('tmp: ' + self.tmp)
+
     if len(kwargs['input']) == 1:
       self.tracks = Tracks(kwargs['input'][0], sort = default0(kwargs['sort'], True))
     elif isinstance(kwargs['input'], list) and len(kwargs['input']) > 1:
@@ -165,31 +172,27 @@ CHAPTER{0:d}NAME={2:s}
   def write(self, **kwargs):
     """combine m4a files to one big file
     writes to the output file name, make sure files are encoded to same 
-    audio quality"""
+    audio quality. 
+
+    Files are added one at a time - reduces memory footprint and use of 
+    TMP directory"""
     if len(self.tracks) <= 0:
       raise RuntimeError("no tracks")
     
     h0, *t0 = self.tracks
 
-    tag = "#audio"
     tag = ""
+    tag = "#audio"
 
-    merger0 = []
-    merger0.insert(0, self.MERGE_COMMAND)
-
-    for t1 in [h0]:
-      merger0.extend(['-add', '{0:s}{1:s}'.format(t1.filename, tag) ])
-    merger0.append("-new")
-    merger0.append(self.output0)
-    self._invoke(merger0)
-
-    merger0 = []
-    merger0.insert(0, self.MERGE_COMMAND)
-
-    for t1 in t0:
-      merger0.extend(['-cat', '{0:s}{1:s}'.format(t1.filename, tag) ])
-    merger0.append(self.output0)
-    self._invoke(merger0)
+    for t1 in self.tracks:
+      merger0 = []
+      merger0.insert(0, self.MERGE_COMMAND)
+      merger0.append('-tmp')
+      merger0.append(self.tmp)
+      merger0.append('-cat')
+      merger0.append('{0:s}{1:s}'.format(t1.filename, tag))
+      merger0.append(self.output0)
+      self._invoke(merger0)
 
     return self.output0
 
