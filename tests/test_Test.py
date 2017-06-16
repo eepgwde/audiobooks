@@ -41,6 +41,7 @@ class Test(unittest.TestCase):
     """
     test0 = None
     dir0 = None
+    files0 = []
     files = []
     logger = None
     
@@ -57,6 +58,7 @@ class Test(unittest.TestCase):
                 cls.files.append(os.path.join(root, name))
 
         cls.files.sort()
+        cls.files0 = cls.files
         cls.logger.info('files: ' + unidecode('; '.join(cls.files)))
     
     ## Logs out.
@@ -67,6 +69,9 @@ class Test(unittest.TestCase):
     ## Null setup. Create a new one.
     def setUp(self):
         self.logger.info('setup')
+        if not type(self).files:
+            type(self).files = type(self).files0
+            
         self.file0, *type(self).files = type(self).files
         self.test0 = Track(self.file0)
         return

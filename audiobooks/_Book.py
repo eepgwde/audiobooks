@@ -59,7 +59,7 @@ CHAPTER{0:d}NAME={2:s}
 
     default0 = lambda x, d: d if x is None else x
 
-    self.tmp = default0(kwargs['tmp'], gettempdir())
+    self.tmp = kwargs.get('tmp', gettempdir())
     logger.info('tmp: ' + self.tmp)
 
     if len(kwargs['input']) == 1:

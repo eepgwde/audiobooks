@@ -1,12 +1,15 @@
-Audiobooks
-====
 **Audiobooks** allows creation of *m4b* audiobooks from single *m4a* files.
 
 Cover images and album metadata such as artist, album name and chapter markings are supported.
 
 ## Current status
 
-Currently it works but you'll have to be careful to fully satisfy all requirements, e.g. software dependencies and correct file metadata on your source material. In the future, those edges will be a little less rough.
+Currently it works but you'll have to be careful to fully satisfy all
+requirements, e.g. software dependencies and correct file metadata on
+your source material. In the future, those edges will be a little less
+rough.
+
+It has been migrated to Python 3.
 
 ## Requirements
 
@@ -19,10 +22,25 @@ Currently it works but you'll have to be careful to fully satisfy all requiremen
 
 This works for Ubuntu:
 
-    $ sudo apt-get install python-mutagen gpac mp4v2-utils
+    $ sudo apt-get install python3-mutagen gpac mp4v2-utils
     $ git clone https://github.com/fheinle/audiobooks.git
     $ cd audiobooks
+
+    $ pip3 install cached_property --user
+    
     $ sudo python setup.py install
+
+## Development
+
+Use the Makefile from the top-level source directory (audiobooks).
+
+Put some .m4a files into tests/media (or link to a directory that has some.)
+Put a listing of those files - absolute pathnames - into tests/p1.lst
+
+You should provide a few files. The test suite loops round the list of
+files needed for tests.
+
+The output directory and file-name are hard-coded in the test_Test.py files.
 
 ## Usage
 
@@ -30,7 +48,6 @@ Currently, Audiobooks requires your files already ripped from CD as mp4 audio,
 no conversion is done. Also, those files need to be tagged proplery, i.e. with
 album name, artist name, disc number, track title and track number. You can use
 ExFalso from QuodLibet if you don't have proper tags.
-
 
     $ audiobooks /path/to/m4a/files
 
