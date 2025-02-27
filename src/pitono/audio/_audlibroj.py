@@ -50,6 +50,23 @@ Note:
 
 from __future__ import print_function;
 
+import re
+import csv
+import os
+import sys
+import glob
+import subprocess
+import logging
+import argparse
+
+from math import floor
+from unidecode import unidecode
+
+from operator import attrgetter
+from tempfile import mkstemp
+
+import importlib.resources
+
 from audiobooks._Book import Book
 
 from mutagen.easymp4 import EasyMP4
@@ -57,35 +74,62 @@ from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
 from mutagen.easymp4 import EasyMP4
 
-from unidecode import unidecode
-from docopt import docopt
-
-import csv
-import os
-import sys
-import glob
-import subprocess
-
-from math import floor
-from operator import attrgetter
-from tempfile import mkstemp
-
-import logging
 
 QUIET = 25
 logging.addLevelName(25, "QUIET")
-logging.basicConfig(filename='audiobooks.log', level=QUIET)
+logging.basicConfig(filename='audlibroj.log', level=QUIET)
 global logger
-logger = logging.getLogger('Test')
+logger = logging.getLogger(__name__)
+
+def help0():
+    """Prints the help message from the package."""
+    try:
+        help_content = importlib.resources.files("pitono.audio").joinpath("audlibroj.txt").read_text()
+        print(help_content, file=sys.stderr)
+    except FileNotFoundError:
+        print("Help file not found.")
+
+
+def parse_args():
+  """
+  Parses command-line arguments using argparse.
+
+  Returns:
+    Namespace: An object containing the parsed arguments.
+  """
+  parser = argparse.ArgumentParser(description="Process command-line arguments.")
+  parser.add_argument(
+    "-n", "--nodo", help="Enable/Disable nodo mode", action="store_true"
+  )
+  parser.add_argument(
+    "-a", "--hashes", help="Use a file of hashes", action="store_true"
+  )
+  parser.add_argument(
+    "-v", "--verbose", help="Display runtime messages", action="store_true"
+  )
+  parser.add_argument(
+    "-f", "--input-file", required=True, help="Path to the input file"
+  )
+  parser.add_argument(
+    "-o", "--output-file", required=False, help="Path to the output file"
+  )
+
+  args = parser.parse_args()
+
+  # Check if input file exists
+  if not os.path.isfile(args.input_file):
+    parser.error(f"Input file '{args.input_file}' does not exist.")
+
+  return args
+
 
 def main():
-    global cli
-    global logger
+    args = parse_args()
+    args.prog = sys.argv[0]
 
-    argv = sys.argv
+    if args.nodo:
+        help0()
     
-    cli = dict((key.lstrip("-<").rstrip(">"), value) for key, value in docopt(__doc__).items())
-
     enable_logging = cli['log']
     if cli['quiet']:
         logger.setLevel(QUIET)
@@ -126,3 +170,9 @@ def main():
             if isinstance(r0, list):
                 print(*r0, sep='')
 
+def audlibroj(*args, **kwargs): 
+  main()
+
+if __name__ == "__main__":
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(audlibroj())

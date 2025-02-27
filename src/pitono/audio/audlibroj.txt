@@ -1,0 +1,42 @@
+Create an audiobook with chapters from files given as input.
+
+Usage:
+  audlibroj (-h | --help)
+  audlibroj [-o FILE] [options] (--files FILE | <input>...)
+
+Arguments:
+  input                                 A directory of files or a file to update or 
+                                        a glob pattern
+
+Options:
+  -h, --help                            Display help message.
+  -l, --log                             Enable gmusicapi logging.
+  -n, --dry-run                         Output options and files
+  -q, --quiet                           Don't output status messages.
+  --tmp DIR                             Pass this directory to use for 
+                                        temporary files (otherwise use TMPDIR and then TMP)
+  -o, FILE, --output FILE               Output .m4b file. Default: output.m4b
+  --sort                                Sort tracks by disc and track number 
+  -v, --verbose                         Output status messages.
+                                        With -l,--log will display warnings.
+                                        With -d,--dry-run will show parameters.
+  -f FILE, --files FILE                 File containing files.
+  --cover FILE                          Add a file of cover-art. Default: cover.jpg
+  -c COMMAND, --command COMMAND         What to do: remove,write,cover,chapters
+
+Patterns can be any valid Python regex patterns.
+
+Commands:
+
+ remove will remove any pre-existing file with the output filename
+ write combines the .m4a files into one the output file using MP4Box
+ cover will install the image file into the output M4B file
+ chapters will install a chapter menu into the file
+ quicktime will convert chapters to the QuickTime format
+
+ chapters0 will print out the chapters entries to the console
+
+Note:
+
+ If you don't have MP4Box installed, you can get a chapter list with the command
+ of chapters0.

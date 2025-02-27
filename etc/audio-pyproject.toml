@@ -40,7 +40,7 @@ description = "Audiobook creator"
 #
 # This field corresponds to the "Description" metadata field:
 # https://packaging.python.org/specifications/core-metadata/#description-optional
-readme = "contrib/README.org"
+readme = "README.rst"
 
 # Specify which Python versions you support. In contrast to the
 # 'Programming Language' classifiers in this file, 'pip install' will check this
@@ -145,7 +145,7 @@ test = ["coverage"]
 # The following would provide a command line executable called `sample`
 # which executes the function `main` from this package when invoked.
 [project.scripts]
-audio = "audio:pitono.audio.audlibroj"
+audlibroj = "audio:pitono.audio.audlibroj"
 
 
 # This is configuration specific to the `setuptools` build backend.
@@ -154,6 +154,7 @@ audio = "audio:pitono.audio.audlibroj"
 # If there are data files included in your packages that need to be
 # installed, specify them here.
 # package-data = { "sample" = ["*.dat"] }
+package-data = { "audio" = ["audlibroj.txt"] }
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
