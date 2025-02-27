@@ -22,7 +22,7 @@ from mutagen.mp4 import AtomDataType
 
 from cached_property import cached_property
 
-from weaves import singledispatch1, Singleton
+from pitono.weaves import singledispatch1, TimeOps
 
 from audiobooks._Tracks import Tracks
 
@@ -109,13 +109,13 @@ CHAPTER{0:d}NAME={2:s}
 
   def _duration(self, track):
     """return the duration as a string for use."""
-    dt0 = Singleton.instance().tm2dt(track.duration1)
-    tm0 = Singleton.instance().dt2tm1(dt0)
+    dt0 = TimeOps.instance().tm2dt(track.duration1)
+    tm0 = TimeOps.instance().dt2tm1(dt0)
     return tm0
 
   def _cumulative(self, track):
     """return the duration as a string for use."""
-    tm0 = Singleton.instance().dt2tm1(track.quality0)
+    tm0 = TimeOps.instance().dt2tm1(track.quality0)
     return tm0
 
   def chapters0(self):

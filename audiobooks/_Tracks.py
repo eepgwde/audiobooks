@@ -16,7 +16,7 @@ from cached_property import cached_property
 from collections import UserList
 from operator import attrgetter
 
-from weaves import singledispatch1, Singleton
+from pitono.weaves import singledispatch1, TimeOps
 
 from audiobooks._Track import Track
 
@@ -73,9 +73,9 @@ class Tracks(UserList):
     """
     tm = tr.duration1
     if self._dt is None:
-      self._dt = Singleton.instance().tm2dt(tm)
+      self._dt = TimeOps.instance().tm2dt(tm)
     else:
-      self._dt = Singleton.instance().dtadvance(self._dt, tm)
+      self._dt = TimeOps.instance().dtadvance(self._dt, tm)
     return self.get()
 
   def before(self, tr):
@@ -84,7 +84,7 @@ class Tracks(UserList):
     This is time at the end of the track.
     """
     if self._dt is None:
-      self._dt = Singleton.instance().epoch
+      self._dt = TimeOps.instance().epoch
     t0 = self.get()
     self.after(tr)
     return t0

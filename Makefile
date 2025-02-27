@@ -8,6 +8,13 @@ UUT ?=
 X_LOGFILE ?= test.log
 SDIR ?= tests/media
 PYTHONIOENCODING=utf-8
+PYTEST ?= pytest
+RLWRAP ?= rlwrap
+TEST_FLAGS ?= -f
+TOP ?= $(PWD)
+
+PYTHONPATH=.:$(TOP)/tests:/usr/lib/python3/dist-packages
+export PYTHONPATH
 
 export SDIR
 export X_LOGFILE
@@ -15,17 +22,26 @@ export X_LOGFILE
 all::
 	true
 
+TEST_FLAGS ?= -v -c 
+
+ifeq ($(PYTEST),unittest)
+DISCOVER0 := discover
+TEST_FLAGS += -f
+RLWRAP ?= rlwrap
+endif
+
+
 ifneq ($(UUT),)
 
 check::
 	:> $(X_LOGFILE)
-	$(PYTHON) -m unittest -v tests.$(UUT)
+	$(RLWRAP) $(PYTHON) -m $(PYTEST) $(TEST_FLAGS) -v tests.$(UUT) 2>&1 | tee make.log
 
 else
 
 check::
 	:> $(X_LOGFILE)
-	$(PYTHON) -m unittest discover -v -s tests
+	$(PYTHON) -m $(PYTEST) $(DISCOVER0) tests 2>&1 | tee make.log
 
 endif 
 

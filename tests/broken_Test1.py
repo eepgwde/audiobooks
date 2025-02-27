@@ -12,26 +12,62 @@ import sys, logging, os
 from unidecode import unidecode
 
 from datetime import datetime, timezone, timedelta, date
+from audiobooks import Track, Tracks, Book, MInfo, MInfo1
 
 from collections import Counter
 
 from MediaInfoDLL3 import MediaInfo
 
 import unittest
-from test_Test import Test
 
-## A test driver for GMus0
+## Audiobook compiler
 #
-# @see GMus0
-class Test1(Test):
+
+logfile = os.environ['X_LOGFILE'] if os.environ.get('X_LOGFILE') is not None else "test.log"
+logging.basicConfig(filename=logfile, level=logging.DEBUG)
+logger = logging.getLogger('Test')
+sh = logging.StreamHandler()
+logger.addHandler(sh)
+
+media0 = os.path.join(os.path.dirname(__file__), "media")
+trs0 = os.path.join(os.path.dirname(__file__), "p1.lst")
+
+
+class Test1(unittest.TestCase):
     """
     Test MInfo1
     """
 
+    flag0=False
+    test0 = None
+    dir0 = None
+    files0 = []
+    files = []
+    logger = None
+
+
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logger
+        cls.dir0 = os.environ['SDIR'] if os.environ.get('SDIR') is not None else media0
+        
+        for root, dirs, files in os.walk(cls.dir0, topdown=True):
+            for name in files:
+                cls.files.append(os.path.join(root, name))
+
+        cls.files.sort()
+        cls.files0 = cls.files
+        cls.logger.info('files: ' + unidecode('; '.join(cls.files)))
+
+
     ## Null setup. Create a new one.
     def setUp(self):
         self.logger.info('setup')
+        if not self.flag0:
+            self.setUpClass()
+            self.flag0 = True
         self.file0, *type(self).files = type(self).files
+        self.test0 = self.file0
         return
 
     ## Null setup.
@@ -42,6 +78,8 @@ class Test1(Test):
     ## Loaded?
     ## Is utf-8 available as a filesystemencoding()
     def test_000(self):
+        import pdb; pdb.set_trace()
+        x0 = Track(self.test0)
         self.assertIsNotNone(self.test0)
         self.test0.open(self.file0)
         return
@@ -52,7 +90,7 @@ class Test1(Test):
         d = minfo.duration()
         self.logger.info("duration: " + d.isoformat())
         return
-    
+
     def test_10(self):
         self.files = []
         for root, dirs, files in os.walk(self.dir0, topdown=True):

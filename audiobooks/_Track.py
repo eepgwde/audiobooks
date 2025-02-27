@@ -11,7 +11,7 @@ from unidecode import unidecode
 
 from math import floor
 import datetime
-from weaves import Singleton
+from pitono.weaves import TimeOps
 
 logger = logging.getLogger('Test')
 
@@ -34,7 +34,7 @@ class Track(object):
   def duration1(self):
     """get track duration as a time"""
     t0 = self._track.info.length
-    dt = Singleton.instance().dtadvance2(seconds=t0)
+    dt = TimeOps.instance().dtadvance2(seconds=t0)
     return dt.time()
 
   @cached_property

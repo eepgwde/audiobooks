@@ -2,6 +2,16 @@
 
 Cover images and album metadata such as artist, album name and chapter markings are supported.
 
+## weaves 
+
+Debian bookworm 
+Python 3.12 from conda
+libmediainfo0 from Debian
+
+MediaInfoDLL.py locally
+
+
+
 ## Current status
 
 Currently it works but you'll have to be careful to fully satisfy all
