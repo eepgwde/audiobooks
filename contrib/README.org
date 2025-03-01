@@ -1,76 +1,172 @@
-**Audiobooks** allows creation of *m4b* audiobooks from single *m4a* files.
+#+title:  pitono-audio
+#+author: weaves
+#+date:   2025-01-28
+
+* Overview
+
+This package provides a single command-line utility that can be used to create
+M4B audiobooks.
+
+    $ audlibroj --cover /path/to/cover.jpg --command "remove,write,cover,chapters" /path/to/m4/files
+
+There is a help file, audlibroj.txt, which can be viewed with -h. Logging with
+-v -l. There are sort, input and output options.
+
+I found I could get a Debian bookworm release to use packages from the bulleye
+release: that was gpac (for MP4Box) and mediainfo. python3-mediainfo, unidecode,
+cached-property and some others.
+
+I had to get mp4chaps from mp4v2-util, but found I didn't need it.
+
+I think you can use Debian multi-media to get GPAC and MP4Box as well.
+
+The final audiobook M4B file is fully featured in Sirin on Android.
+
+
+* Packaging
+
+This package uses the new PyPA namespace packaging format defined by a single
+PyProject.toml.
+
+*** Runtime environment
+
+My target environment is Debian bookworm. It has many packages for Python. So this
+package does not give its full suite of dependencies to be installed by PIP.
+
+The binary packages are provided by the Debian OS and there are some other
+python3-* packages. The first two below, and the following are binary libraries.
+My own pitono utilities are at the end. And this may not be a complete list.
+
+  + unidecode
+  + cached_property
+    
+  + mutagen - the interface to GPAC and MP4Box
+  + gpac - the implementation of GPAC
+  + mediainfo - C runtime library
+
+  + pitono.weaves - PIP GitHub
+  + pitono.buildr - PIP GitHub
+
+I use my own pitono.weaves library for some Time utilities.
+
+On Debian bookworm, gpac is not available. The version from oldstable (bullseye)
+is and does work. You would need to add bullseye to you /etc/apt/sources.list.d
+and install it with the -t oldstable setting. It has dependencies on other
+packages which it should also find in bullseye.
+
+The source suggests it uses mp4chaps sometimes. This and an alternative source
+for the other packages are at Debian-Multi-Media.
+
+Useful OS utility is AtomicParsley if you need to tag .m4a files.
+mp3info2 is useful for tagging .mp3 files. Conversion from .mp3 to .m4a is
+given below.
+
+It's a good idea to use AtomicParsley on the final M4B audiobook to give artist,
+title, year and album.
+
+*** Development environment
+
+I develop using Mamba, but I use an environment that is pinned to Python 3.11
+and so I can adjust the PYTHONPATH to use the Debian OS packages: /usr/lib/python3/dist-packages.
+
+The Mamba Development Environment has the large packages, like Pandas and Jupyter
+installed, because these often bring many smaller packages; in this way, I have
+separated the environments, so if you install the package, you can try and
+extend the OS environment first.
+
+So testing is only available in the Mamba Dev environment, as are dill,
+flake8, black and so on.
+
+** audlibroj
+
+Is the final script, it is a useful help method that gives a fairly complete
+summary how to use the program.
+
+It allows for creation of *m4b* audiobooks from single tagged *m4a* files.
 
 Cover images and album metadata such as artist, album name and chapter markings are supported.
 
-## weaves 
-
-Debian bookworm 
-Python 3.12 from conda
-libmediainfo0 from Debian
-
-MediaInfoDLL.py locally
-
-
-
-## Current status
+*** Current status
 
 Currently it works but you'll have to be careful to fully satisfy all
 requirements, e.g. software dependencies and correct file metadata on
 your source material. In the future, those edges will be a little less
 rough.
 
-It has been migrated to Python 3.
+It has been migrated to Python 3 and now runs on Debian bookworm.
 
-## Requirements
+*** Requirements
 
  * python-mutagen
  * MP4Box from gpac
- * mp4chaps from mp4v2-utils
  * cached_property python module
 
-## Installation
+*** Installation
 
-This works for Ubuntu:
+This may work for Debian bookworm: You need to have bullseye as old stable and
+Debiann Multi-Media, if you can get these packages you can create audiobooks
+with the command-line script.
 
     $ sudo apt-get install python3-mutagen gpac mp4v2-utils
-    $ git clone https://github.com/fheinle/audiobooks.git
-    $ cd audiobooks
 
-    $ pip3 install cached_property --user
-    
-    $ sudo python setup.py install
+*** Development
 
-## Development
+This package is part of my pitono namespace. It has common build scripts for me.
+See that GitHub package for help. A make test goal is given in defs.mk.
 
-Use the Makefile from the top-level source directory (audiobooks).
+The tests do work. You need some test data: top/src/pitono/tests and
+top/src/pitono/tests/media need some files. tests/media should be tagged .m4a
+files. And a list of those files in p1.lst. You can also use the walser.jpg as a
+cover image. I recommend the test list be short and the files are small and you
+read and write from fast disks.
 
-Put some .m4a files into tests/media (or link to a directory that has some.)
-Put a listing of those files - absolute pathnames - into tests/p1.lst
+These m4a files must be tagged. To do that, you can use AtomicParsley.
 
-You should provide a few files. The test suite loops round the list of
-files needed for tests.
+Unfortunately, An output directory and file-name are hard-coded in the test_*.py
+files. You will need to change those.
 
-The output directory and file-name are hard-coded in the test_Test.py files.
+** Usage
 
-## Usage
+Currently, the utility audlibroj requires your files already ripped from CD as
+mp4 audio, no conversion is done. Also, those files need to be tagged proplery,
+i.e. with album name, artist name, disc number, track title and track number.
+You can use ExFalso from QuodLibet if you don't have proper tags.
 
-Currently, Audiobooks requires your files already ripped from CD as mp4 audio,
-no conversion is done. Also, those files need to be tagged proplery, i.e. with
-album name, artist name, disc number, track title and track number. You can use
-ExFalso from QuodLibet if you don't have proper tags.
+Very often you must specify the command string: --command
+"remove,write,cover,chapters" and make sure it appears before the files.
 
-    $ audiobooks /path/to/m4a/files
+    $ audlibroj --command "remove,write,cover,chapters" /path/to/m4a/files 
 
 You should receive an *album name*.m4b file with chapters and album metadata.
 
 If you want to add a cover image to your audiobook file, that image must already be available as PNG or JPG. You can either name it ``cover.jpg`` and place it in the same directory as your audio files, where it will be found automatically or pass its filename explicitly:
 
-    $ audiobooks --cover /path/to/cover.jpg /path/to/m4/files
+    $ audlibroj --cover /path/to/cover.jpg --command "remove,write,cover,chapters" /path/to/m4/files 
 
-## Contributors
+There's a help file, it has -l and -v to get detailed logging.
+
+    $ audlibroj -h
+
+If anything goes wrong, it is usually an invalid path, a missing file, or
+unwriteable directories.
+
+File must be .m4a and they should be tagged. There is some automated conversion
+using make in conv1.mk.
+
+*** Converting MP3 to M4A and Tagging
+
+conv1.mk has this invocation which works reliably. 
+
+        ffmpeg -y -i $< -c:a aac -b:a 128k -vn $@
+
+* Contributors
+
+The original author was 
 
  * Florian Heinle <launchpad@planet-tiax.de>
 
-## License
+I extended it to work with Sirin on Android. I added Nero timestamps and durations.
+
+* License
 
 [Gnu General Public License (GPL), Version 2 or later](https://www.gnu.org/licenses/gpl-2.0.html#SEC1)

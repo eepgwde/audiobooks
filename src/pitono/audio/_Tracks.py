@@ -8,49 +8,45 @@ import logging
 import glob
 import os
 
-import datetime
-
-from mutagen.easymp4 import EasyMP4
-from cached_property import cached_property
-
 from collections import UserList
-from operator import attrgetter
 
 from pitono.weaves import singledispatch1, TimeOps
 
-from audiobooks._Track import Track
+from ._Track import Track
 
-logger = logging.getLogger('Test')
+logger = logging.getLogger("Test")
+
 
 class Tracks(UserList):
 
   fnames = []
-  _dt = None                    # the quality0 date.
+  _dt = None  # the quality0 date.
   _delegate = None
 
   def set_delegate(self, name0):
     self._delegate = getattr(self, name0)
-    
+
   """List of audio"""
+
   def __init__(self, fnames, **kwargs):
-    super().__init__(self.load(fnames, sort0=kwargs.get('sort', False)))
-    self.set_delegate(kwargs.get('delegate0', "before"))
+    super().__init__(self.load(fnames, sort0=kwargs.get("sort", False)))
+    self.set_delegate(kwargs.get("delegate0", "before"))
     self.fnames = fnames
 
   @singledispatch1
   def load(self, a):
-    raise NotImplementedError('Unsupported type')
-  
+    raise NotImplementedError("Unsupported type")
+
   @load.register(list)
-  def _(self, fnames, sort0 = False):
+  def _(self, fnames, sort0=False):
     l0 = [Track(track_file) for track_file in fnames]
     if sort0:
       l0.sort()
     return l0
-  
+
   @load.register(str)
-  def _(self, dir0, sort0 = True):
-    l0 = glob.glob(os.path.join(dir0, '*.m4a'))
+  def _(self, dir0, sort0=True):
+    l0 = glob.glob(os.path.join(dir0, "*.m4a"))
     return self.load(l0, sort0=sort0)
 
   def __iter__(self):
@@ -60,7 +56,7 @@ class Tracks(UserList):
     self._dt = None
     return s0
 
-  def __getitem__(self, i): 
+  def __getitem__(self, i):
     tr = super().__getitem__(i)
     logger.debug("Tracks: next")
     tr.quality0 = self._delegate(tr)
@@ -89,10 +85,9 @@ class Tracks(UserList):
     self.after(tr)
     return t0
 
-  def get(self, l0 = -1):
+  def get(self, l0=-1):
     return self._dt
 
   def __repr__(self):
     """utf-8 formatted text representation"""
-    return "; ".join( [str(x) for x in self.data] )
-
+    return "; ".join([str(x) for x in self.data])

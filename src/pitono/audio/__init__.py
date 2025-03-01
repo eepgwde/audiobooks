@@ -6,4 +6,3 @@ from ._MInfo import MInfo
 from ._MInfo1 import MInfo1
 
 from ._audlibroj import audlibroj
-

@@ -145,7 +145,7 @@ test = ["coverage"]
 # The following would provide a command line executable called `sample`
 # which executes the function `main` from this package when invoked.
 [project.scripts]
-audlibroj = "audio:pitono.audio.audlibroj"
+audlibroj = "pitono.audio:audlibroj"
 
 
 # This is configuration specific to the `setuptools` build backend.

@@ -6,12 +6,12 @@ Container class for Tracks forming an AudioBook.
 Be sure that the TMP directory is large enough.
 
 """
+
 # -*- coding: utf-8 -*-
 
 import logging
 from unidecode import unidecode
 
-import glob
 import os
 import subprocess
 
@@ -20,13 +20,12 @@ from mutagen.easymp4 import EasyMP4
 from mutagen.mp4 import MP4Cover, MP4
 from mutagen.mp4 import AtomDataType
 
-from cached_property import cached_property
+from pitono.weaves import TimeOps
 
-from pitono.weaves import singledispatch1, TimeOps
+from ._Tracks import Tracks
 
-from audiobooks._Tracks import Tracks
+logger = logging.getLogger("Test")
 
-logger = logging.getLogger('Test')
 
 class Book(object):
   _chapters = []
@@ -44,7 +43,7 @@ CHAPTER{0:d}NAME={2:s}
 
   def __init__(self, **kwargs):
     """Initialize an audiobook container. Accepts keys that are typically
-    command-line arguments: 
+    command-line arguments:
     - dry-run, boolean, do nothing if True
     - input, a list of files to include in the book;
     - sort, a boolean, should the files be sorted on disc and track number
@@ -55,34 +54,39 @@ CHAPTER{0:d}NAME={2:s}
     for k in kwargs.items():
       logger.info(k)
 
-    self.nodo = kwargs.get('dry-run', False)
+    self.nodo = kwargs.get("dry-run", False)
 
     default0 = lambda x, d: d if x is None else x
 
-    self.tmp = kwargs.get('tmp', gettempdir())
-    logger.info('tmp: ' + self.tmp)
+    self.tmp = kwargs.get("tmp", gettempdir())
+    if self.tmp is None:
+      self.tmp = os.environ.get("TMPDIR", "/tmp")
+    logger.info(f"tmp: {self.tmp}")
 
-    if len(kwargs['input']) == 1:
-      self.tracks = Tracks(kwargs['input'][0], sort = default0(kwargs['sort'], True))
-    elif isinstance(kwargs['input'], list) and len(kwargs['input']) > 1:
-      self.tracks = Tracks(kwargs['input'], sort = default0(kwargs['sort'], False))
-    elif kwargs['files']:
-      logger.debug('files: ')
-      x0 = kwargs['files']
+    # import pdb; pdb.set_trace()
+
+    if "files" in kwargs:
+      x0 = kwargs["files"]
       with open(x0, encoding="utf-8") as f:
         files = f.read().splitlines()
-        self.tracks = Tracks(files, sort = default0(kwargs['sort'], False))
+        sort0 = kwargs.get("sort", False)
+        self.tracks = Tracks(files, sort=sort0)
+    elif "input" in kwargs and len(kwargs["input"]) > 0:
+      self.tracks = Tracks(kwargs["input"], sort=kwargs.get("sort", False))
+    else:
+      logger.error("No files given")
+      raise ValueError("No files given")
 
-    output0 = kwargs.get('output', None)
+    output0 = kwargs.get("output", None)
     if output0 is None:
       try:
         output0 = "{:s}.m4b".format(unidecode(self[0].album))
-      except:
+      except Exception as e:
         output0 = "output.m4b"
         logger.warning("Book: ctr: failed: output")
     self.output0 = output0
 
-    cover0 = kwargs.get('cover', None)
+    cover0 = kwargs.get("cover", None)
     if cover0 is None:
       try:
         cover0 = "{:s}.jpg".format(unidecode(self[0].album))
@@ -93,14 +97,15 @@ CHAPTER{0:d}NAME={2:s}
 
   def __repr__(self):
     """ASCII formatted text representation"""
-    default0 = lambda x,d: d if x is None else unidecode(x)
-    
-    s0 = "\"{0:s}\" \"{1:s}\"".format \
-(default0(self.output0, ""), default0(self.cover0, ""))
+    default0 = lambda x, d: d if x is None else unidecode(x)
+
+    s0 = '"{0:s}" "{1:s}"'.format(
+      default0(self.output0, ""), default0(self.cover0, "")
+    )
     return "( {0:s} : {1:s} )".format(s0, str(self.tracks))
 
-  def __getitem__(self, i): 
-    """Indexed access: return the track at the i-th position """
+  def __getitem__(self, i):
+    """Indexed access: return the track at the i-th position"""
     return self.tracks[i]
 
   def __len__(self):
@@ -127,8 +132,9 @@ CHAPTER{0:d}NAME={2:s}
     lines = []
     for track_number, track in enumerate(self.tracks):
       tm0 = self._cumulative(track)
-      s0 = self.CHAPTER_TEMPLATE.format \
-(track_number + 1, tm0, unidecode(track.title))
+      s0 = self.CHAPTER_TEMPLATE.format(
+        track_number + 1, tm0, unidecode(track.title)
+      )
       lines.append(s0)
     self._chapters = lines
     return self._chapters
@@ -136,49 +142,52 @@ CHAPTER{0:d}NAME={2:s}
   def metadata(self, **kwargs):
     """Write album and artist information to audiobook file.
 
-    Changes the filename, expects album and artist to be defined by the first track"""
-    if self.nodo: return
-    
+    Changes the filename, expects album and artist to be defined by the first track
+    """
+    if self.nodo:
+      return
+
     track = EasyMP4(self.output0)
-    track['album'] = kwargs.get('album', self[0].album)
-    track['title'] = track['album']
-    track['artist'] = kwargs.get('artist', self[0].artist)
+    track["album"] = kwargs.get("album", self[0].album)
+    track["title"] = track["album"]
+    track["artist"] = kwargs.get("artist", self[0].artist)
     track.save()
-  
+
   def cover(self, **kwargs):
     """Write cover image to audiobook file"""
-    self.cover0 = kwargs.get('cover', self.cover0)
-    if self.cover0.endswith('png'):
+    self.cover0 = kwargs.get("cover", self.cover0)
+    if self.cover0.endswith("png"):
       picture_type = AtomDataType.PNG
-    elif self.cover0.endswith('jpg') or self.cover0.endswith('jpeg'):
+    elif self.cover0.endswith("jpg") or self.cover0.endswith("jpeg"):
       picture_type = AtomDataType.JPEG
-    if self.nodo: return
-    
+    if self.nodo:
+      return
+
     logger.debug("cover: " + self.cover0)
-    with open(self.cover0, 'rb') as file0:
+    with open(self.cover0, "rb") as file0:
       art0 = MP4Cover(data=file0.read(), imageformat=picture_type)
       track = MP4(self.output0)
-      track['covr'] = [art0]
+      track["covr"] = [art0]
       track.save()
 
   def _invoke(self, cmd):
     merger1 = -1
     if self.nodo:
-      logger.info("write: cmd: " + '; '.join(cmd))
+      logger.info("write: cmd: " + "; ".join(cmd))
     else:
       merger1 = subprocess.call(cmd)
     return merger1
 
   def write(self, **kwargs):
     """combine m4a files to one big file
-    writes to the output file name, make sure files are encoded to same 
-    audio quality. 
+    writes to the output file name, make sure files are encoded to same
+    audio quality.
 
-    Files are added one at a time - reduces memory footprint and use of 
+    Files are added one at a time - reduces memory footprint and use of
     TMP directory"""
     if len(self.tracks) <= 0:
       raise RuntimeError("no tracks")
-    
+
     h0, *t0 = self.tracks
 
     tag = ""
@@ -187,10 +196,10 @@ CHAPTER{0:d}NAME={2:s}
     for t1 in self.tracks:
       merger0 = []
       merger0.insert(0, self.MERGE_COMMAND)
-      merger0.append('-tmp')
+      merger0.append("-tmp")
       merger0.append(self.tmp)
-      merger0.append('-cat')
-      merger0.append('{0:s}{1:s}'.format(t1.filename, tag))
+      merger0.append("-cat")
+      merger0.append("{0:s}{1:s}".format(t1.filename, tag))
       merger0.append(self.output0)
       self._invoke(merger0)
 
@@ -201,26 +210,28 @@ CHAPTER{0:d}NAME={2:s}
 
     This will invoke chapters0() if necessary."""
 
-    if len(self._chapters) <= 0: self.chapters0()
+    if len(self._chapters) <= 0:
+      self.chapters0()
     if len(self._chapters) <= 0:
       raise RuntimeError("no chapters")
 
-    fchaps = mkstemp(prefix='chaplist')[1]
-    with open(fchaps, 'w') as file0:
+    fchaps = mkstemp(prefix="chaplist")[1]
+    with open(fchaps, "w") as file0:
       file0.writelines(self._chapters)
-    
+
     merger0 = []
     merger1 = -1
     merger0.insert(0, self.MERGE_COMMAND)
-    merger0.extend(['-chap', fchaps])
+    merger0.extend(["-chap", fchaps])
     merger0.append(self.output0)
     if self.nodo:
-      logger.info("write: cmd: " + '; '.join(merger0))
+      logger.info("write: cmd: " + "; ".join(merger0))
     else:
       merger1 = subprocess.call(merger0)
-      if not self.nodo: os.remove(fchaps)
+      if not self.nodo:
+        os.remove(fchaps)
       if merger1 != 0:
-        raise RuntimeError('Merge unsuccessful')
+        raise RuntimeError("Merge unsuccessful")
     return self.output0
 
   def quicktime(self, **kwargs):
@@ -233,16 +244,17 @@ CHAPTER{0:d}NAME={2:s}
     merger0.append("-Q")
     merger0.append(self.output0)
     if self.nodo:
-      logger.info("write: cmd: " + '; '.join(merger0))
+      logger.info("write: cmd: " + "; ".join(merger0))
     else:
       merger1 = subprocess.call(merger0)
       if merger1 != 0:
-        raise RuntimeError('QuickTime chapters failed')
+        raise RuntimeError("QuickTime chapters failed")
     return self.output0
 
   def remove(self, **kwargs):
     """Delete the output file"""
     try:
-      if not self.nodo: os.remove(self.output0)
+      if not self.nodo:
+        os.remove(self.output0)
     except:
       logger.warning("remove: " + self.output0)

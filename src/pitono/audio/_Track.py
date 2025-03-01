@@ -10,16 +10,16 @@ from cached_property import cached_property
 from unidecode import unidecode
 
 from math import floor
-import datetime
 from pitono.weaves import TimeOps
 
-logger = logging.getLogger('Test')
+logger = logging.getLogger("Test")
+
 
 class Track(object):
   """single audio file"""
 
   _quality0 = None
-  
+
   def __init__(self, fname):
     self._track = EasyMP4(fname)
     logger.info("Track: ctr: " + type(self._track).__name__)
@@ -42,43 +42,43 @@ class Track(object):
     """get track title as unicode string"""
     track_title = "Unknown"
     try:
-      track_title = self._track['title'][0]
+      track_title = self._track["title"][0]
     except:
       logger.warning("track_title")
     return track_title
-    
+
   @cached_property
   def disc_track(self):
     """get disc and track number as tuple"""
     discnumber = 1
     try:
-      discnumber = int(self._track['discnumber'][0])
+      discnumber = int(self._track["discnumber"][0])
     except:
       logger.warning("discnumber")
-        
+
     tracknumber = 1
     try:
-      tracknumber = int(self._track['tracknumber'][0])
+      tracknumber = int(self._track["tracknumber"][0])
     except:
       logger.warning("tracknumber")
-          
+
     return (discnumber, tracknumber)
-        
+
   @cached_property
   def album(self):
     """get album name"""
-    track_album = self._track['album'][0]
+    track_album = self._track["album"][0]
     return track_album
 
   @property
   def filename(self):
     """get underlying filename"""
-    return getattr(self._track, 'filename')
-        
+    return getattr(self._track, "filename")
+
   @cached_property
   def artist(self):
     """get artist name"""
-    track_artist = self._track['artist'][0]
+    track_artist = self._track["artist"][0]
     return track_artist
 
   @property
@@ -91,7 +91,7 @@ class Track(object):
   @quality0.setter
   def quality0(self, val):
     self._quality0 = val
-        
+
   def __lt__(self, other):
     logger.warning("lt: ")
     return self.disc_track < other.disc_track
@@ -99,12 +99,13 @@ class Track(object):
   def __unicode__(self):
     """text representation"""
     return "<Track '%s'>" % self.title
-        
+
   def __str__(self):
     """text representation"""
-    return "<Disc {1:d} Track {2:d} '{0:s}'>".format \
-(unidecode(self.title), self.disc_track[0], self.disc_track[1])
-        
+    return "<Disc {1:d} Track {2:d} '{0:s}'>".format(
+      unidecode(self.title), self.disc_track[0], self.disc_track[1]
+    )
+
   def __repr__(self):
     """utf-8 formatted text representation"""
-    return self.__unicode__().encode('utf-8')
+    return self.__unicode__().encode("utf-8")
