@@ -69,15 +69,11 @@ N_J0 ?= -j4
 
 ifeq ($(MAKECMDGOALS),target)
 
-# the error listings are optional -k doesn't work
-
 target: 
 	@echo update: $(PWD)
 	$(REMAKE) S_TAG=$(S_TAG) S_IN="$(S_IN)" all-data-local
 	$(REMAKE) S_TAG=$(S_TAG) all-relink-local
 	$(REMAKE) $(N_J0) S_TAG=$(S_TAG) all-local
-
-# -$(REMAKE) all-error-local 
 
 endif
 
