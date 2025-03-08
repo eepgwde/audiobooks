@@ -34,11 +34,10 @@ My target environment is Debian bookworm. It has many packages for Python. So th
 package does not give its full suite of dependencies to be installed by PIP.
 
 The binary packages are provided by the Debian OS and there are some other
-python3-* packages. The first two below, and the following are binary libraries.
+python3-* packages. The first one below, and the following are binary libraries.
 My own pitono utilities are at the end. And this may not be a complete list.
 
   + unidecode
-  + cached_property
     
   + mutagen - the interface to GPAC and MP4Box
   + gpac - the implementation of GPAC
@@ -99,7 +98,6 @@ It has been migrated to Python 3 and now runs on Debian bookworm.
 
  * python-mutagen
  * MP4Box from gpac
- * cached_property python module
 
 *** Installation
 

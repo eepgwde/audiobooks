@@ -26,7 +26,6 @@ It has been migrated to Python 3.
  * python-mutagen
  * MP4Box from gpac
  * mp4chaps from mp4v2-utils
- * cached_property python module
 
 ## Installation
 

@@ -229,7 +229,6 @@ class Test(unittest.TestCase):
     d0["dry-run"] = True
     d0["cover"] = "abc.jpg"
     d0["output0"] = "abc.m4b"
-    import pdb; pdb.set_trace()
 
     book = Book(**d0)
     book.write()
