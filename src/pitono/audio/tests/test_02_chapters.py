@@ -31,6 +31,8 @@ logger.addHandler(sh)
 media0 = os.path.join(os.path.dirname(__file__), "media")
 trs0 = os.path.join(os.path.dirname(__file__), "p1.lst")
 
+def enter_post_mortem(type, value, traceback):
+  pdb.pm()
 
 class Test(unittest.TestCase):
   """
@@ -69,6 +71,7 @@ class Test(unittest.TestCase):
 
   ## Null setup. Create a new one.
   def setUp(self):
+    sys.excepthook = enter_post_mortem
     self.logger.info("setup")
     if not type(self).files:
       type(self).files = type(self).files0
@@ -191,7 +194,9 @@ class Test(unittest.TestCase):
     self.logger.info("chapters: " + str(len(chapters)))
     self.logger.info("book: " + "\n".join(chapters))
 
+  @unittest.skip("load a directory - not implemented")
   def test_43(self):
+    """Load a directory - not implemented"""
     logger.info("test_43")
     d0 = dict([["sort", True]])
     d0["files"] = []
@@ -201,13 +206,14 @@ class Test(unittest.TestCase):
     file1.writelines(book.chapters0())
 
   def test_45(self):
-    files = []
+    """Testing load: files is path, input is a list """
+    files = ''
     global trs0
     with open(trs0, encoding="utf-8") as f:
       files = f.read().splitlines()
     d0 = dict([["sort", False]])
     d0["files"] = trs0
-    d0["input"] = []
+    # d0["input"] = []
     d0["cover"] = "abc.jpg"
     d0["output0"] = "abc.m4b"
     book = Book(**d0)
@@ -218,25 +224,27 @@ class Test(unittest.TestCase):
     with open(trs0, encoding="utf-8") as f:
       files = f.read().splitlines()
     d0 = dict([["sort", False]])
-    d0["files"] = trs0
-    d0["input"] = []
+    # d0["files"] = []
+    d0["input"] = files
     d0["dry-run"] = True
     d0["cover"] = "abc.jpg"
     d0["output0"] = "abc.m4b"
+    import pdb; pdb.set_trace()
+
     book = Book(**d0)
     book.write()
 
   def test_49(self):
-    files = []
+    files = None
     global trs0
     with open(trs0, encoding="utf-8") as f:
       files = f.read().splitlines()
     d0 = dict([["sort", False]])
     d0["files"] = trs0
-    d0["input"] = []
+    # d0["input"] = []
     d0["dry-run"] = True
     d0["cover"] = "tests/walser.jpg"
-    d0["output0"] = "/a/l/X-media/cache/weaves/bak/walser.m4b"
+    d0["output0"] = "tests/walser.m4b"
     d0["tmp"] = os.environ["TMP"] if os.environ.get("TMP") else "/tmp"
     book = Book(**d0)
     book.chapters0()

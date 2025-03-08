@@ -63,15 +63,15 @@ CHAPTER{0:d}NAME={2:s}
       self.tmp = os.environ.get("TMPDIR", "/tmp")
     logger.info(f"tmp: {self.tmp}")
 
-    # import pdb; pdb.set_trace()
-
-    if "files" in kwargs:
+    ## files is a file of filenames
+    if "files" in kwargs and isinstance(kwargs["files"],str):
       x0 = kwargs["files"]
       with open(x0, encoding="utf-8") as f:
         files = f.read().splitlines()
         sort0 = kwargs.get("sort", False)
         self.tracks = Tracks(files, sort=sort0)
     elif "input" in kwargs and len(kwargs["input"]) > 0:
+      ## input is a list
       self.tracks = Tracks(kwargs["input"], sort=kwargs.get("sort", False))
     else:
       logger.error("No files given")

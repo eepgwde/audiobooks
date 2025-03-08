@@ -6,7 +6,7 @@
 
 import logging
 from mutagen.easymp4 import EasyMP4
-from cached_property import cached_property
+from functools import cached_property
 from unidecode import unidecode
 
 from math import floor

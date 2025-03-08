@@ -1,10 +1,13 @@
 ## weaves
-# Test make file for PKG testing.
-# Part of pitono. Used to build and test weaves
-
-# Now to be used with conda
+# Test make file for audiobook conversion
+# Part of pitono. Used to convert
 
 # To be run from the package directory. References files above.
+
+# Make a link from a directory of MP3 files to msrc0
+# Copy the files to msrc
+# Find an image file
+# make -f conv1.mk S_IN=$PWD/msrc S_TAG=0 S_IMAGE=cover.jpg target
 
 # Local $(PWD) defs.mk may not be there
 -include defs.mk

@@ -32,7 +32,7 @@ import unittest
 
 from pitono.audio import Track, Tracks, Book
 from pitono.audio import MInfo, MInfo1
-from cached_property import cached_property
+from functools import cached_property
 
 logfile = (
   os.environ["X_LOGFILE"] if os.environ.get("X_LOGFILE") is not None else "test.log"
