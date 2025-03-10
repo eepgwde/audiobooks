@@ -10,6 +10,7 @@ libmediainfo0 from Debian
 
 MediaInfoDLL.py locally
 
+This is a simple README, there is a more detailed one in contrib/.
 
 
 ## Current status
