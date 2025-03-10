@@ -73,9 +73,6 @@ class Test1(unittest.TestCase):
   ## Loaded?
   ## Is utf-8 available as a filesystemencoding()
   def test_000(self):
-    import pdb
-
-    pdb.set_trace()
     x0 = Track(self.test0)
     self.assertIsNotNone(self.test0)
     self.test0.open(self.file0)
