@@ -34,8 +34,6 @@ This works for Ubuntu:
     $ sudo apt-get install python3-mutagen gpac mp4v2-utils
     $ git clone https://github.com/fheinle/audiobooks.git
     $ cd audiobooks
-
-    $ pip3 install cached_property --user
     
     $ sudo python setup.py install
 
