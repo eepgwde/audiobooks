@@ -153,9 +153,16 @@ using make in conv1.mk.
 
 *** Converting MP3 to M4A and Tagging
 
-conv1.mk has this invocation which works reliably. 
+conv1.mk has this invocation which works reliably.
 
-        ffmpeg -y -i $< -c:a aac -b:a 128k -vn $@
+        ffmpeg -y -i $< -c:a aac -b:a 32k -vn $@
+
+You can reduce the quality to just 32k.
+
+If you have installed Debian Multi-media Org, you can use their ffmpeg. This has
+nonfree and libfdk_aac enabled. You can then use -vbr 1 for low-quality encode.
+
+  https://trac.ffmpeg.org/wiki/Encode/AAC
 
 * Contributors
 
