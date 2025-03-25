@@ -61,10 +61,18 @@ SFILES0 ?= $(wildcard $(S_OUT)/???-file.mp3)
 SFILES1 ?= $(SFILES0:.mp3=.m4a)
 
 $(S_OUT)/%.m4a: $(S_OUT)/%.mp3
-	ffmpeg -y -i $< -c:a aac -b:a 128k -vn $@
+	ffmpeg -y -i $< -c:a libfdk_aac -vbr 1 -vn $@
 
-#	ffmpeg -i $< -c:a libfdk_aac -vn $@
+#	ffmpeg -y -i $< -c:a aac -b:a 128k -vn $@
 
+$(S_BASE)/srcs.lst: $(SFILES0)
+	echo $+ | xargs -n1 > $@
+
+$(S_BASE)/dsts.lst: $(SFILES1)
+	echo $+ | xargs -n1 > $@
+
+all-local1: $(S_BASE)/srcs.lst $(S_BASE)/dsts.lst
+	parallel -a $(S_BASE)/srcs.lst -a $(S_BASE)/dsts.lst --link ffmpeg -i {1} -c:a libfdk_aac -vbr 1 -vn {2}
 
 all-local: $(SFILES1)
 
