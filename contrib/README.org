@@ -13,8 +13,7 @@ There is a help file, audlibroj.txt, which can be viewed with -h. Logging with
 -v -l. There are sort, input and output options.
 
 I found I could get a Debian bookworm release to use packages from the bulleye
-release: that was gpac (for MP4Box) and mediainfo. python3-mediainfo, unidecode,
-cached-property and some others.
+release: that was gpac (for MP4Box) and libmediainfo0. python3-mediainfo, python3-unidecode and some others.
 
 I had to get mp4chaps from mp4v2-util, but found I didn't need it.
 

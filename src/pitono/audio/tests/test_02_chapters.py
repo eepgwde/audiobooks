@@ -258,7 +258,7 @@ class Test(unittest.TestCase):
     d0["files"] = trs0
     d0["input"] = []
     d0["cover"] = "tests/walser.jpg"
-    d0["output"] = "/a/l/X-media/cache/weaves/bak/walser.m4b"
+    d0["output"] = "../walser.m4b"
     d0["tmp"] = os.environ["TMP"] if os.environ.get("TMP") else "/tmp"
 
     book = Book(**d0)
